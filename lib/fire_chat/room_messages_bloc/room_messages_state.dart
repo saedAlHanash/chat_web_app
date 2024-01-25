@@ -18,10 +18,10 @@ class RoomMessagesInitial  {
   factory RoomMessagesInitial.initial() {
     return RoomMessagesInitial(
       allMessages:
-          roomMessage.values.map((e) => types.Message.fromJson(jsonDecode(e))).toList()
+          roomMessage!.values.map((e) => types.Message.fromJson(jsonDecode(e))).toList()
             ..sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0)),
       roomId: '',
-      oldLength: roomMessage.length,
+      oldLength: roomMessage!.length,
       statuses: CubitStatuses.init,
     );
   }

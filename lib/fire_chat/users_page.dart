@@ -1,12 +1,15 @@
 import 'package:chat_web_app/app_widget.dart';
 import 'package:chat_web_app/fire_chat/extensions.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
+import 'package:drawable_text/drawable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
- 
+
 import 'package:hive/hive.dart';
+import 'package:image_multi_type/image_multi_type.dart';
 import 'package:image_multi_type/round_image_widget.dart';
 
+import '../go_route_pages.dart';
 import 'chat_card_widget.dart';
 import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
@@ -18,11 +21,31 @@ class UsersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
+      appBar: AppBar(
+        title: DrawableText(
+          text: userTypeFromUrl == 't' ? 'طلابي' : "أساتذتي",
+        ),
+        centerTitle: true,
+      ),
       body: BlocBuilder<ChatUsersCubit, ChatUsersInitial>(
         builder: (context, state) {
           if (state.statuses.loading) {
             return const CircularProgressIndicator.adaptive();
+          }
+          if (state.result.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ImageMultiType(
+                    url: Icons.supervised_user_circle_outlined,
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                  DrawableText(text: 'لا يوجد بيانات')
+                ],
+              ),
+            );
           }
           return ListView.separated(
             itemCount: state.result.length,
@@ -71,13 +94,11 @@ class _UserItemState extends State<UserItem> {
             context.read<GetRoomsCubit>().state.stream?.pause();
             Navigator.pop(context);
             openRoomFunction(context, room).then((value) {
-              roomMessage.close();
+              roomMessage?.close();
               context.read<GetRoomsCubit>().state.stream?.resume();
             });
           }
-        } else {
-
-        }
+        } else {}
       },
       child: Container(
         padding: const EdgeInsets.symmetric(

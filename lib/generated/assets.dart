@@ -12,11 +12,11 @@ class Assets {
   static const String assetsIconSend = 'assets/icon-send.png';
   static const String assetsIconX = 'assets/icon-x.png';
   static const String assetsImagesCourse = 'assets/images/course.jpeg';
-  static const String assetsLogo = 'assets/logo.png';
   static const String imagesCart = 'assets/images/cart.png';
   static const String imagesCourse = 'assets/images/course.png';
   static const String imagesCourseImage = 'assets/images/courseImage.png';
   static const String imagesDesign = 'assets/images/design.png';
+  static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesNewCourse = 'assets/images/new_course.png';
   static const String imagesNoconnection = 'assets/images/No connection.gif';
   static const String imagesTech = 'assets/images/tech.png';

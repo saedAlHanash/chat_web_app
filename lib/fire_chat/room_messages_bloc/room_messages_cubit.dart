@@ -47,15 +47,15 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
         data['id'] = doc.id;
         data['updatedAt'] = data['updatedAt']?.millisecondsSinceEpoch;
 
-        roomMessage.put(doc.id, jsonEncode(data));
+        roomMessage?.put(doc.id, jsonEncode(data));
 
         newMessages.add(types.Message.fromJson(data));
       }
 
-      if (!isClosed) {
+      if (!isClosed && roomMessage != null) {
         emit(
           state.copyWith(
-            allMessages: roomMessage.values
+            allMessages: roomMessage!.values
                 .map((e) => types.Message.fromJson(jsonDecode(e)))
                 .toList()
               ..sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0)),

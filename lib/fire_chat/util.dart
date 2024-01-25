@@ -2,20 +2,13 @@ import 'dart:async';
 
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
-
-import 'package:get/get_core/src/get_main.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import '../go_route_pages.dart';
-import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_room_object.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 const String baseUrl = 'https://manage.almas.education/api';
 const String baseImageUrl = 'https://manage.almas.education/public/storage/';
@@ -33,7 +26,7 @@ enum CubitStatuses { init, loading, done, error }
 
 late Box<String> roomsBox;
 late Box usersBox;
-late Box<String> roomMessage;
+ Box<String>? roomMessage;
 late Box<int> latestUpdateMessagesBox;
 
 Future<void> initialBoxes() async {

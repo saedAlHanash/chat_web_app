@@ -29,7 +29,6 @@ final appGoRouter = GoRouter(
         return MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => GetRoomsCubit()..getChatRooms()),
-            BlocProvider(create: (_) => ChatUsersCubit()..getChatUsers()),
           ],
           child: const MessagesScreen(),
         );
@@ -64,93 +63,19 @@ final appGoRouter = GoRouter(
       },
     ),
 
-    ///homePage
-    GoRoute(
-      name: GoRouteName.homePage,
-      path: _GoRoutePath.homePage,
-      builder: (BuildContext context, GoRouterState state) {
-        return Scaffold(
-          body: Center(
-            child: ElevatedButton(
-                onPressed: () {
-                  context.pushNamed(
-                    GoRouteName.loadData,
-                    queryParams: {
-                      'id': '73',
-                      'name': 'teacher',
-                      'type': 't',
-                      'token': 'dsfsfgsdf',
-                    },
-                  );
-                },
-                child: DrawableText(text: 'saed')),
-          ),
-        );
-      },
-    ),
   ],
 );
 
 class GoRouteName {
-  static const homePage = 'Home Page';
+
   static const messages = 'Message';
   static const loadData = 'LoadData';
-  static const driverInfo = 'driver info';
-  static const debts = 'debts';
-  static const createDriver = 'createDriver';
-  static const updateDriver = 'updateDriver';
-  static const createCarCategory = 'CreateCarCategory';
-  static const createAdmin = 'createAdmin';
-  static const adminInfo = 'adminInfo';
-  static const clientInfo = 'clientInfo';
-  static const pointInfo = 'pointInfo';
-  static const tripInfo = 'tripInfo';
-  static const sharedTripInfo = 'sharedTripInfo';
-  static const createCoupon = 'createCoupon';
-  static const createRole = 'createRole';
-  static const tripsPae = 'tripsPae';
-  static const sharedTripsPae = 'sharedTripsPae';
-  static const createInstitution = 'createInstitution';
-  static const createTempTrip = 'createTempTrip';
-  static const tempTripInfo = 'tempTripInfo';
-  static const area = 'area';
-  static const redeems = 'redeems';
 
-  static const createCompany = 'createCompany';
-  static const createPlan = 'createPlan';
-  static const agencyReport = 'agencyReport';
-  static const createCompanyPath = 'createCompanyPath';
-  static const companyPathInfo = 'companyPathInfo';
-  static const createPlanTrip = 'createPlanTrip';
 }
 
 class _GoRoutePath {
-  static const createCompany = '/createCompany';
-  static const homePage = '/';
-  static const driverInfo = '/DriverInfo';
-  static const loadData = '/loadData';
+
+  static const loadData = '/';
   static const messages = '/messages';
-  static const createDriver = '/createDriver';
-  static const updateDriver = '/updateDriver';
-  static const createCarCategory = '/CreateCarCategory';
-  static const createAdmin = '/createAdmin';
-  static const adminInfo = '/adminInfo';
-  static const clientInfo = '/clientInfo';
-  static const pointInfo = '/pointInfo';
-  static const tripInfo = '/tripInfo';
-  static const sharedTripInfo = '/sharedTripInfo';
-  static const createCoupon = '/createCoupon';
-  static const createRole = '/createRole';
-  static const tripsPae = '/tripsPae';
-  static const sharedTripsPae = '/sharedTripsPae';
-  static const createInstitution = '/createInstitution';
-  static const createTempTrip = '/createTempTrip';
-  static const tempTripInfo = '/tempTripInfo';
-  static const area = '/area';
-  static const redeems = '/redeems';
-  static const createPlan = '/createPlan';
-  static const agencyReport = '/agencyReport';
-  static const createCompanyPath = '/createCompanyPath';
-  static const companyPathInfo = '/companyPathInfo';
-  static const createPlanTrip = '/createPlanTrip';
+
 }

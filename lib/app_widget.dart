@@ -3,12 +3,15 @@ import 'package:drawable_text/drawable_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_multi_type/image_multi_type.dart';
 
 import 'fire_chat/get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'fire_chat/my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
+import 'generated/assets.dart';
 import 'go_route_pages.dart';
 
-const mainColor=Color(0xff3D5CFF);
+const mainColor = Color(0xff3D5CFF);
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -17,8 +20,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -29,6 +30,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       builder: (context, child) {
+        setImageMultiTypeErrorImage(const ImageMultiType(url: Assets.imagesLogo));
         DrawableText.initial(
           initialColor: Colors.black,
           titleSizeText: 28.0,

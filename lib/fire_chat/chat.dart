@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/fire_chat/room_messages_bloc/room_messages_cubit.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -23,6 +24,7 @@ import '../../main.dart';
 import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_room_object.dart';
 import 'src/widgets/chat.dart';
+import 'dart:html' as html;
 
 class ChatPage extends StatefulWidget {
   const ChatPage({
@@ -84,6 +86,7 @@ class _ChatPageState extends State<ChatPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              const SizedBox(height: 15.0),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
@@ -119,23 +122,26 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleFileSelection() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
 
-    if (result != null && result.files.single.path != null) {
+    final result = await FilePicker.platform.pickFiles();
+
+    if (result != null && result.files.firstOrNull != null) {
       _setAttachmentUploading(true);
-      final name = result.files.single.name;
-      final filePath = result.files.single.path!;
-      final file = File(filePath);
 
+      final name = result.files.single.name;
+
+      final fileBytes = result.files.first.bytes;
+
+      if (fileBytes == null) return;
       try {
         final reference = FirebaseStorage.instance.ref(name);
-        await reference.putFile(file);
+
+        await reference.putData(fileBytes);
+
         final uri = await reference.getDownloadURL();
 
         final message = types.PartialFile(
-          mimeType: lookupMimeType(filePath),
+          mimeType: lookupMimeType(result.files.single.name),
           name: name,
           size: result.files.single.size,
           uri: uri,
@@ -158,21 +164,22 @@ class _ChatPageState extends State<ChatPage> {
 
     if (result != null) {
       _setAttachmentUploading(true);
-      final file = File(result.path);
-      final size = file.lengthSync();
-      final bytes = await result.readAsBytes();
-      final image = await decodeImageFromList(bytes);
       final name = result.name;
 
+      final bytes = await result.readAsBytes();
+
+      final image = await decodeImageFromList(bytes);
+
       try {
+
         final reference = FirebaseStorage.instance.ref(name);
-        await reference.putFile(file);
+        await reference.putData(bytes);
         final uri = await reference.getDownloadURL();
 
         final message = types.PartialImage(
           height: image.height.toDouble(),
           name: name,
-          size: size,
+          size: bytes.length,
           uri: uri,
           width: image.width.toDouble(),
         );
@@ -194,29 +201,8 @@ class _ChatPageState extends State<ChatPage> {
 
       if (message.uri.startsWith('http')) {
         try {
-          final updatedMessage = message.copyWith(isLoading: true);
-          FirebaseChatCore.instance.updateMessage(
-            updatedMessage,
-            widget.room.id,
-          );
-
-          final client = http.Client();
-          final request = await client.get(Uri.parse(message.uri));
-          final bytes = request.bodyBytes;
-          final documentsDir = (await getApplicationDocumentsDirectory()).path;
-          localPath = '$documentsDir/${message.name}';
-
-          if (!File(localPath).existsSync()) {
-            final file = File(localPath);
-            await file.writeAsBytes(bytes);
-          }
-        } finally {
-          final updatedMessage = message.copyWith(isLoading: false);
-          FirebaseChatCore.instance.updateMessage(
-            updatedMessage,
-            widget.room.id,
-          );
-        }
+          downloadFile(localPath);
+        } finally {}
       }
 
       await OpenFilex.open(localPath);
@@ -268,26 +254,83 @@ class _ChatPageState extends State<ChatPage> {
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Text(widget.name),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(bottom: 15),
-        child: BlocBuilder<RoomMessagesCubit, RoomMessagesInitial>(
-          builder: (context, state) {
-            return FireChat(
-              isAttachmentUploading: _isAttachmentUploading,
-              messages: state.allMessages,
-              onAttachmentPressed: _handleAtachmentPressed,
-              onMessageTap: _handleMessageTap,
-
-              onPreviewDataFetched: _handlePreviewDataFetched,
-              onSendPressed: _handleSendPressed,
-              // theme: DefaultChatTheme1(),
-              user: types.User(
-                id: firebaseUser?.uid ?? '',
-              ),
-            );
-          },
-        ),
+      body: BlocBuilder<RoomMessagesCubit, RoomMessagesInitial>(
+        builder: (context, state) {
+          return FireChat(
+            isAttachmentUploading: _isAttachmentUploading,
+            messages: state.allMessages,
+            onAttachmentPressed: _handleAtachmentPressed,
+            onMessageTap: _handleMessageTap,
+            onPreviewDataFetched: _handlePreviewDataFetched,
+            onSendPressed: _handleSendPressed,
+            // theme: DefaultChatTheme1(),
+            user: types.User(
+              id: firebaseUser?.uid ?? '',
+            ),
+          );
+        },
       ),
     );
+  }
+}
+
+void showLoadingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevents dialog dismissal on outside tap
+    builder: (BuildContext context) {
+      return Dialog(
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16.0),
+              Text("Loading..."),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void downloadFile(String url) {
+  final anchorElement = html.AnchorElement(href: url);
+  anchorElement.download = url;
+  anchorElement.click();
+}
+
+
+Future<Uint8List?> fetchImage(String imageUrl) async {
+  if (imageUrl.isEmpty) return null;
+
+  final imageFromCash = hiveFilesBox?.get(imageUrl);
+
+  if (imageFromCash != null) {
+    loggerObject.w('from hive ${imageFromCash!.length}');
+
+    return imageFromCash;
+  }
+
+  try {
+    loggerObject.v(imageUrl);
+
+    final response = await http.get(
+      Uri.parse(
+        'https://api.allorigins.win/raw?url=$imageUrl',
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      hiveFilesBox?.put(imageUrl, response.bodyBytes);
+
+      return response.bodyBytes;
+    } else {
+      return null;
+    }
+  } on Exception {
+    return null;
   }
 }

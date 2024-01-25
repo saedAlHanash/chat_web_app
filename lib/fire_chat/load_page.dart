@@ -45,12 +45,16 @@ class _LoadDataState extends State<LoadData> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: const Column(
-        children: [
-          ImageMultiType(url: Icons.chat),
-          SizedBox(height: 30.0),
-          DrawableText(text: 'يرجى الانتظار')
-        ],
+      body: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ImageMultiType(url: Icons.chat),
+            SizedBox(height: 30.0),
+            DrawableText(text: 'يرجى الانتظار')
+          ],
+        ),
       ),
     );
   }
