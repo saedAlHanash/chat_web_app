@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/fire_chat/room_messages_bloc/room_messages_cubit.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
+import 'package:drawable_text/drawable_text.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -122,7 +124,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleFileSelection() async {
-
     final result = await FilePicker.platform.pickFiles();
 
     if (result != null && result.files.firstOrNull != null) {
@@ -171,7 +172,6 @@ class _ChatPageState extends State<ChatPage> {
       final image = await decodeImageFromList(bytes);
 
       try {
-
         final reference = FirebaseStorage.instance.ref(name);
         await reference.putData(bytes);
         final uri = await reference.getDownloadURL();
@@ -247,12 +247,33 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        title: Text(widget.name),
+        centerTitle: true,
+
+        title: !isAdmin
+            ? Text(widget.name)
+            : Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            DrawableText(
+              size: 20.0,
+              text: widget.room.users.first.lastName.toString(),
+              color: Colors.black,
+            ),
+            const Text(' | '),
+            DrawableText(
+              size: 20.0,
+              text: widget.room.users.last.lastName.toString(),
+              color: Colors.black,
+            ),
+          ],
+        ),
       ),
       body: BlocBuilder<RoomMessagesCubit, RoomMessagesInitial>(
         builder: (context, state) {
@@ -263,10 +284,12 @@ class _ChatPageState extends State<ChatPage> {
             onMessageTap: _handleMessageTap,
             onPreviewDataFetched: _handlePreviewDataFetched,
             onSendPressed: _handleSendPressed,
-            // theme: DefaultChatTheme1(),
-            user: types.User(
-              id: firebaseUser?.uid ?? '',
-            ),
+            customBottomWidget: !isAdmin ? null : const SizedBox(),
+            user: !isAdmin
+                ? types.User(
+              id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
+            )
+                : widget.room.users.last,
           );
         },
       ),
@@ -302,20 +325,18 @@ void downloadFile(String url) {
   anchorElement.click();
 }
 
-
 Future<Uint8List?> fetchImage(String imageUrl) async {
   if (imageUrl.isEmpty) return null;
 
   final imageFromCash = hiveFilesBox?.get(imageUrl);
 
   if (imageFromCash != null) {
-    loggerObject.w('from hive ${imageFromCash!.length}');
+
 
     return imageFromCash;
   }
 
   try {
-    loggerObject.v(imageUrl);
 
     final response = await http.get(
       Uri.parse(

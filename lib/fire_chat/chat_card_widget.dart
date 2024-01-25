@@ -5,6 +5,7 @@ import 'package:chat_web_app/fire_chat/chat.dart';
 import 'package:chat_web_app/fire_chat/extensions.dart';
 import 'package:chat_web_app/fire_chat/room_messages_bloc/room_messages_cubit.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
 
 import 'package:flutter/material.dart';
@@ -30,11 +31,9 @@ class ChatCardWidget extends StatefulWidget {
 }
 
 class _ChatCardWidgetState extends State<ChatCardWidget> {
-
   Future<void> openRoom(
     BuildContext context,
   ) async {
-
     if (context.mounted) {
       context.read<GetRoomsCubit>().state.stream?.pause();
       openRoomFunction(context, widget.room).then((value) {
@@ -53,14 +52,18 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
       child: Container(
         height: MediaQuery.of(context).size.height / 6,
         width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 0.1,
-            blurRadius: 8,
-            offset: const Offset(0, 10), // changes position of shadow
-          ),
-        ], borderRadius: BorderRadius.circular(12.0), color: Colors.white),
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 0.1,
+              blurRadius: 8,
+              offset: const Offset(0, 10), // changes position of shadow
+            ),
+          ],
+          borderRadius: BorderRadius.circular(12.0),
+          color: Colors.white,
+        ),
         margin:
             EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height / 162.4),
         child: Row(children: [
@@ -114,15 +117,12 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
   }
 }
 
-
 Future openRoomFunction(BuildContext context, Room room) async {
-
   roomMessage = await Hive.openBox<String>(room.id);
 
   if (context.mounted) {
-
     context.read<GetRoomsCubit>().state.stream?.pause();
-
+loggerObject.w(isAdmin);
     return await Navigator.push(
       context,
       MaterialPageRoute(

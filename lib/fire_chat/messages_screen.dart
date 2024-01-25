@@ -1,6 +1,8 @@
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/app_widget.dart';
+import 'package:chat_web_app/fire_chat/chat_card_admin_widget.dart';
 import 'package:chat_web_app/fire_chat/extensions.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,7 +34,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: (userTypeFromUrl == 'a')
+      floatingActionButton: (isAdmin)
           ? null
           : Padding(
               padding: const EdgeInsets.all(16.0),
@@ -96,9 +98,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
               itemCount: state.allRooms.length,
               itemBuilder: (context, i) {
                 final openRoom = state.allRooms[i];
-                return ChatCardWidget(
-                  room: openRoom,
-                );
+                return isAdmin
+                    ? ChatCardAdminWidget(room: openRoom)
+                    : ChatCardWidget(
+                        room: openRoom,
+                      );
               },
             );
           },

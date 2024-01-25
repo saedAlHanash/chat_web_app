@@ -25,7 +25,6 @@ class _LoadDataState extends State<LoadData> {
       Future.delayed(
         const Duration(seconds: 1),
         () {
-          loggerObject.w('message');
           context.pushReplacementNamed(GoRouteName.messages);
         },
       );

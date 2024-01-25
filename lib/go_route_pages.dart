@@ -40,7 +40,6 @@ final appGoRouter = GoRouter(
       name: GoRouteName.loadData,
       path: _GoRoutePath.loadData,
       builder: (BuildContext context, GoRouterState state) {
-        loggerObject.wtf(state.queryParams);
 
         if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
 
@@ -51,7 +50,6 @@ final appGoRouter = GoRouter(
         userTypeFromUrl = state.queryParams['type'] ?? '';
 
         var userChanged = false;
-        loggerObject.w(AppSharedPreference.getMyId);
         if (AppSharedPreference.getMyId != userIdFromUrl) {
           userChanged = true;
           AppSharedPreference.cashMyId(userIdFromUrl);
@@ -63,6 +61,30 @@ final appGoRouter = GoRouter(
       },
     ),
 
+    // ///homePage
+    // GoRoute(
+    //   name: GoRouteName.homePage,
+    //   path: _GoRoutePath.homePage,
+    //   builder: (BuildContext context, GoRouterState state) {
+    //     return Scaffold(
+    //       body: Center(
+    //         child: ElevatedButton(
+    //             onPressed: () {
+    //               context.pushNamed(
+    //                 GoRouteName.loadData,
+    //                 queryParams: {
+    //                   'id': '0',
+    //                   'name': 'admin',
+    //                   'type': 'a',
+    //                   'token': '889|R9yJZkErCt0wsd6oP0DfOhHlV7MVPoucFV5BsL41',
+    //                 },
+    //               );
+    //             },
+    //             child: DrawableText(text: 'saed')),
+    //       ),
+    //     );
+    //   },
+    // ),
   ],
 );
 
@@ -70,10 +92,13 @@ class GoRouteName {
 
   static const messages = 'Message';
   static const loadData = 'LoadData';
+  static const homePage = 'homePage';
 
 }
 
 class _GoRoutePath {
+
+  // static const homePage = '/';
 
   static const loadData = '/';
   static const messages = '/messages';

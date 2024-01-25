@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/go_route_pages.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,9 +29,9 @@ class ChatUsersCubit extends Cubit<ChatUsersInitial> {
   }
 
   Future<List<MyChatUser>?> _getChatUsersApi() async {
-    if(userTypeFromUrl == 'a') return [];
+    if(isAdmin) return [];
     final response = await APIService().getApi(
-      url: userTypeFromUrl == 't' ? 'api/teacher/my-students' : "api/student/my-teachers",
+      url: isTeacher ? 'api/teacher/my-students' : "api/student/my-teachers",
     );
     if (response.statusCode == 200) {
       return ChatUsersResponse.fromJson(jsonDecode(response.body)).students;

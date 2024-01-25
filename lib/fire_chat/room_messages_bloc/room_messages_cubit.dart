@@ -33,7 +33,7 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
           ),
         );
 
-    final stream = query.snapshots().listen((snapshot) {
+    final stream = query.snapshots().listen((snapshot) async {
       final newMessages = <types.Message>[];
       for (var doc in snapshot.docs) {
         final data = doc.data();
@@ -47,7 +47,7 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
         data['id'] = doc.id;
         data['updatedAt'] = data['updatedAt']?.millisecondsSinceEpoch;
 
-        roomMessage?.put(doc.id, jsonEncode(data));
+        await roomMessage?.put(doc.id, jsonEncode(data));
 
         newMessages.add(types.Message.fromJson(data));
       }

@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:chat_web_app/api_manager/api_service.dart';
+import 'package:chat_web_app/go_route_pages.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -17,10 +19,7 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
 
   Future<void> getChatRooms() async {
 
-    loggerObject.v(firebaseUser?.email);
     if (await firebaseUserAsync == null) return;
-
-    loggerObject.v(firebaseUser?.email);
     emit(state.copyWith(statuses: CubitStatuses.loading));
 
     rooms();
@@ -30,17 +29,24 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   void rooms() {
     var query = FirebaseFirestore.instance
         .collection('rooms')
-        .orderBy('updatedAt', descending: true)
-        .where(
-          'userIds',
-          arrayContains: firebaseUser?.uid,
-        )
-        .where(
-          'updatedAt',
-          isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(
-            getLatestUpdatedFromHive,
-          ),
-        );
+        .orderBy('updatedAt', descending: true);
+
+    if (!isAdmin) {
+
+      query.where(
+        'userIds',
+        arrayContains: firebaseUser?.uid,
+      );
+    }
+
+    query.where(
+      'updatedAt',
+      isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(
+        getLatestUpdatedFromHive,
+      ),
+    );
+
+
 
     final stream = query.snapshots().listen((snapshot) async {
       final listRooms = await processRoomsQuery(
@@ -50,7 +56,7 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
         'users',
       );
 
-      storeRoomsInHive(listRooms);
+      await storeRoomsInHive(listRooms);
 
       if (!isClosed) {
         _setData();
@@ -58,24 +64,6 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
     });
 
     emit(state.copyWith(stream: stream));
-  }
-
-  Future<int> get getLatestUpdatedRoom async {
-    final latestUpdateItem = await FirebaseFirestore.instance
-        .collection('rooms')
-        .orderBy('updatedAt', descending: true)
-        .where(
-          'userIds',
-          arrayContains: firebaseUser?.uid,
-        )
-        .limit(1)
-        .get();
-
-    final item = latestUpdateItem.docs.firstOrNull?.data();
-
-    item?['updatedAt'] = item['updatedAt']?.millisecondsSinceEpoch;
-
-    return item?['updatedAt'] ?? 1;
   }
 
   int get getLatestUpdatedFromHive {

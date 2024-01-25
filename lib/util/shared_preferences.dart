@@ -46,7 +46,7 @@ class AppSharedPreference {
     return _prefs != null;
   }
 
-  static cashToken(String token)async  {
+  static cashToken(String token) async {
     await _prefs?.setString(_token, token);
     APIService.reInitial();
   }
@@ -61,8 +61,8 @@ class AppSharedPreference {
 
   static String get getMyId => _prefs?.getString(_myId) ?? '';
 
-  static cashTypeId(String id) async{
-   await _prefs?.setString(_agencyId, id);
+  static cashTypeId(String id) async {
+    await _prefs?.setString(_agencyId, id);
   }
 
   static String get getTypeId => _prefs?.getString(_agencyId) ?? '';
@@ -141,3 +141,7 @@ class AppSharedPreference {
 
   static String get getEmail => _prefs?.getString(_email) ?? '';
 }
+
+bool get isAdmin => AppSharedPreference.getTypeId == 'a';
+bool get isStudent => AppSharedPreference.getTypeId == 's';
+bool get isTeacher => AppSharedPreference.getTypeId == 't';

@@ -1,6 +1,7 @@
 import 'package:chat_web_app/app_widget.dart';
 import 'package:chat_web_app/fire_chat/extensions.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,7 +24,7 @@ class UsersPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: DrawableText(
-          text: userTypeFromUrl == 't' ? 'طلابي' : "أساتذتي",
+          text: isTeacher ? 'طلابي' : "أساتذتي",
         ),
         centerTitle: true,
       ),
