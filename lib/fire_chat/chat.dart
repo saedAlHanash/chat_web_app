@@ -283,6 +283,12 @@ class _ChatPageState extends State<ChatPage> {
             onMessageTap: _handleMessageTap,
             onPreviewDataFetched: _handlePreviewDataFetched,
             onSendPressed: _handleSendPressed,
+            customBottomWidget: !isAdmin ? null : const SizedBox(),
+            user: !isAdmin
+                ? types.User(
+                    id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
+                  )
+                : widget.room.users.last,
             theme: DefaultChatTheme(
               inputBackgroundColor: Colors.white,
               inputTextColor: mainColor,
@@ -316,9 +322,6 @@ class _ChatPageState extends State<ChatPage> {
                 ),
               ),
               inputPadding: const EdgeInsets.symmetric(vertical: 10.0).h,
-            ),
-            user: types.User(
-              id: firebaseUser?.uid ?? '',
             ),
           );
         },
