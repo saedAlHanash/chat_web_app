@@ -18,8 +18,8 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   GetRoomsCubit() : super(GetRoomsInitial.initial());
 
   Future<void> getChatRooms() async {
-
     if (await firebaseUserAsync == null) return;
+
     emit(state.copyWith(statuses: CubitStatuses.loading));
 
     rooms();
@@ -27,23 +27,32 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
 
   /// Returns a stream of messages from Firebase for a given room.
   void rooms() {
-    var query = FirebaseFirestore.instance
-        .collection('rooms')
-        .orderBy('updatedAt', descending: true);
-
+    late final Query<Map<String, dynamic>> query;
     if (!isAdmin) {
-      query.where(
-        'userIds',
-        arrayContains: firebaseUser?.uid,
-      );
+      query = FirebaseFirestore.instance
+          .collection('rooms')
+          .orderBy('updatedAt', descending: true)
+          .where(
+            'userIds',
+            arrayContains: firebaseUser?.uid,
+          )
+          .where(
+            'updatedAt',
+            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(
+              getLatestUpdatedFromHive,
+            ),
+          );
+    } else {
+      query = FirebaseFirestore.instance
+          .collection('rooms')
+          .orderBy('updatedAt', descending: true)
+          .where(
+            'updatedAt',
+            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(
+              getLatestUpdatedFromHive,
+            ),
+          );
     }
-
-    query.where(
-      'updatedAt',
-      isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(
-        getLatestUpdatedFromHive,
-      ),
-    );
 
     if (state.stream != null) {
       state.stream!.cancel();

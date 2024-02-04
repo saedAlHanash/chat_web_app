@@ -398,7 +398,7 @@ class FireChatState extends State<FireChat> {
           horizontal: 24,
         ),
         child: Text(
-          widget.l10n.emptyChatPlaceholder,
+          'لا يوجد رسائل هنا بعد',
           style: widget.theme.emptyChatPlaceholderTextStyle,
           textAlign: TextAlign.center,
         ),

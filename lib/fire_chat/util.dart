@@ -41,6 +41,14 @@ Future<void> initialBoxes() async {
   latestMessagesBox = await Hive.openBox('latestMessagesBox');
 }
 
+Future<void> reInitialBoxes() async {
+  await roomsBox?.close();
+  await latestUpdateMessagesBox?.close();
+  await usersBox?.close();
+  await latestMessagesBox?.close();
+  await initialBoxes();
+}
+
 User? get firebaseUser {
   final user = FirebaseChatCore.instance.firebaseUser;
   if (user == null) _initial();
@@ -136,6 +144,7 @@ Future<void> loginChatUser(String id, String? name, String? photo) async {
 Future<void> logoutChatUser() async {
   loggerObject.w('logout');
   await roomsBox?.clear();
+  await reInitialBoxes();
   await FirebaseAuth.instance.signOut();
 }
 
