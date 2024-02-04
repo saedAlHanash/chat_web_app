@@ -1,5 +1,3 @@
-
-
 import '../../../util.dart';
 
 class ChatUsersResponse {
@@ -63,7 +61,8 @@ class MyChatUser {
       roleId: json["role_id"] ?? "",
       firstName: json["first_name"] ?? "",
       email: json["email"] ?? "",
-      photo: (baseImageUrl + json["photo"] ?? ""),
+      photo:
+          ('${((json["photo"] ?? "") as String).startsWith('http') ? '' : baseImageUrl}${json["photo"] ?? ""}'),
       emailVerifiedAt: json["email_verified_at"],
       settings: json["settings"] == null ? null : Settings.fromJson(json["settings"]),
       createdAt: DateTime.tryParse(json["created_at"] ?? ""),

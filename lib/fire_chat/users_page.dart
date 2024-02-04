@@ -5,8 +5,10 @@ import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:hive/hive.dart';
+import 'package:image_multi_type/circle_image_widget.dart';
 import 'package:image_multi_type/image_multi_type.dart';
 import 'package:image_multi_type/round_image_widget.dart';
 
@@ -16,12 +18,24 @@ import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
 import 'my_students/data/response/chat_users_response.dart';
 
-class UsersPage extends StatelessWidget {
+class UsersPage extends StatefulWidget {
   const UsersPage({super.key});
+
+  @override
+  State<UsersPage> createState() => _UsersPageState();
+}
+
+class _UsersPageState extends State<UsersPage> {
+  @override
+  void initState() {
+    context.read<ChatUsersCubit>().getChatUsers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: DrawableText(
           text: isTeacher ? 'طلابي' : "أساتذتي",
@@ -79,54 +93,60 @@ class UserItem extends StatefulWidget {
 class _UserItemState extends State<UserItem> {
   var loading = false;
 
+  Future<void> onTapUser() async {
+    if (loading) return;
+    setState(() => loading = true);
+    final room =
+        await context.read<GetRoomsCubit>().getRoomByUser(widget.user.id.toString());
+
+    setState(() => loading = false);
+    if (context.mounted && room != null) {
+      if (context.mounted) {
+        openRoomFunction(context, room);
+      }
+    } else {
+      // Get.showSnackbar(const GetSnackBar(
+      //   title: 'المستخدم غير موجود ',
+      //   message: 'لم يقم المستخدم بتسجيل الدخول بعد تحديث التطبيق',
+      //   backgroundColor: Colors.black54,
+      //   duration: Duration(seconds: 5),
+      //   borderRadius: 25,
+      //   snackPosition: SnackPosition.TOP,
+      // ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        if (loading) return;
-        setState(() => loading = true);
-        final room =
-            await context.read<GetRoomsCubit>().getRoomByUser(widget.user.id.toString());
-
-        setState(() => loading = false);
-        if (context.mounted && room != null) {
-          roomMessage = await Hive.openBox<String>(room.id);
-          if (context.mounted) {
-            context.read<GetRoomsCubit>().state.stream?.pause();
-            Navigator.pop(context);
-            openRoomFunction(context, room).then((value) {
-              roomMessage?.close();
-              context.read<GetRoomsCubit>().state.stream?.resume();
-            });
-          }
-        } else {}
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
+    print(widget.user.photo);
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListTile(
+        onTap: onTapUser,
+        horizontalTitleGap: 15.w,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0).r,
+        title: Text(
+          widget.user.getName,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 14.0.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width / 6,
-              height: MediaQuery.of(context).size.width / 6,
-              margin: const EdgeInsets.only(left: 10.0, right: 20.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
+        leading: loading
+            ? const CircularProgressIndicator.adaptive()
+            : CircleImageWidget(
+                size: 50.0.r,
+                url: widget.user.photo,
               ),
-              alignment: Alignment.center,
-              child: loading
-                  ? const CircularProgressIndicator.adaptive()
-                  : RoundImageWidget(
-                      url: widget.user.photo,
-                      color: mainColor,
-                      height: 50.0,
-                      width: 50.0,
-                    ),
-            ),
-            Text(widget.user.getName),
-          ],
+        trailing: SizedBox(
+          width: 1.0.sw / 4.2,
+          child: ImageMultiType(
+            url: Icons.arrow_forward_ios_outlined,
+            height: 12.0.r,
+            width: 12.0.r,
+            color: Colors.grey,
+          ),
         ),
       ),
     );

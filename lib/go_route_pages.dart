@@ -21,6 +21,7 @@ String userTypeFromUrl = '';
 
 final appGoRouter = GoRouter(
   routes: <GoRoute>[
+
     ///messages
     GoRoute(
       name: GoRouteName.messages,
@@ -28,7 +29,9 @@ final appGoRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => GetRoomsCubit()..getChatRooms()),
+            BlocProvider(create: (_) =>
+            GetRoomsCubit()
+              ..getChatRooms()),
           ],
           child: const MessagesScreen(),
         );
@@ -40,7 +43,6 @@ final appGoRouter = GoRouter(
       name: GoRouteName.loadData,
       path: _GoRoutePath.loadData,
       builder: (BuildContext context, GoRouterState state) {
-
         if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
 
         userIdFromUrl = state.queryParams['id'] ?? '';
@@ -61,30 +63,30 @@ final appGoRouter = GoRouter(
       },
     ),
 
-    // ///homePage
-    // GoRoute(
-    //   name: GoRouteName.homePage,
-    //   path: _GoRoutePath.homePage,
-    //   builder: (BuildContext context, GoRouterState state) {
-    //     return Scaffold(
-    //       body: Center(
-    //         child: ElevatedButton(
-    //             onPressed: () {
-    //               context.pushNamed(
-    //                 GoRouteName.loadData,
-    //                 queryParams: {
-    //                   'id': '0',
-    //                   'name': 'admin',
-    //                   'type': 'a',
-    //                   'token': '889|R9yJZkErCt0wsd6oP0DfOhHlV7MVPoucFV5BsL41',
-    //                 },
-    //               );
-    //             },
-    //             child: DrawableText(text: 'saed')),
-    //       ),
-    //     );
-    //   },
-    // ),
+    ///homePage
+    GoRoute(
+      name: GoRouteName.homePage,
+      path: _GoRoutePath.homePage,
+      builder: (BuildContext context, GoRouterState state) {
+        return Scaffold(
+          body: Center(
+            child: ElevatedButton(
+                onPressed: () {
+                  context.pushNamed(
+                    GoRouteName.loadData,
+                    queryParams: {
+                      'id': '0',
+                      'name': 'admin',
+                      'type': 'a',
+                      'token': '889|R9yJZkErCt0wsd6oP0DfOhHlV7MVPoucFV5BsL41',
+                    },
+                  );
+                },
+                child: DrawableText(text: 'saed')),
+          ),
+        );
+      },
+    ),
   ],
 );
 
@@ -98,9 +100,9 @@ class GoRouteName {
 
 class _GoRoutePath {
 
-  // static const homePage = '/';
+  static const homePage = '/';
 
-  static const loadData = '/';
+  static const loadData = '/loadData';
   static const messages = '/messages';
 
 }

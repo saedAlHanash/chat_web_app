@@ -46,7 +46,9 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
       ),
     );
 
-
+    if (state.stream != null) {
+      state.stream!.cancel();
+    }
 
     final stream = query.snapshots().listen((snapshot) async {
       final listRooms = await processRoomsQuery(
@@ -93,8 +95,7 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   }
 
   Future<void> storeRoomsInHive(List<types.Room> rooms) async {
-    for (var i = 0; i < rooms.length; i++) {
-      final e = rooms[i];
+    for (var e in rooms) {
       await roomsBox.put(e.id, jsonEncode(e));
     }
   }
@@ -105,8 +106,6 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
 
   Future<types.Room?> getRoomByUser(String? id) async {
     if (id == null) return null;
-
-    print(id);
     for (var e in state.allRooms) {
       for (var e1 in e.users) {
         if (e1.firstName == id) {

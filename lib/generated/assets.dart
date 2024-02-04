@@ -12,6 +12,7 @@ class Assets {
   static const String assetsIconSend = 'assets/icon-send.png';
   static const String assetsIconX = 'assets/icon-x.png';
   static const String assetsImagesCourse = 'assets/images/course.jpeg';
+  static const String assetsLogo = 'assets/logo.png';
   static const String imagesCart = 'assets/images/cart.png';
   static const String imagesCourse = 'assets/images/course.png';
   static const String imagesCourseImage = 'assets/images/courseImage.png';

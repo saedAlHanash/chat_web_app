@@ -29,10 +29,12 @@ late Box usersBox;
  Box<String>? roomMessage;
 late Box<int> latestUpdateMessagesBox;
 
+late Box<String> latestMessagesBox;
 Future<void> initialBoxes() async {
   roomsBox = await Hive.openBox('rooms');
   latestUpdateMessagesBox = await Hive.openBox('messages');
   usersBox = await Hive.openBox('users');
+    latestMessagesBox = await Hive.openBox('latestMessagesBox');
 }
 
 User? get firebaseUser {
@@ -100,8 +102,7 @@ Future<void> createChatUser(String id, String? name, String? photo) async {
       types.User(
         firstName: id,
         id: credential.user!.uid,
-        imageUrl:
-            '${(photo?.contains('http://') ?? true) ? '' : baseImageUrl}${photo ?? ''}',
+        imageUrl: photo?.replaceAll(baseImageUrl, ''),
         lastName: name ?? DateTime.now().toString(),
       ),
     );
@@ -122,8 +123,7 @@ Future<void> loginChatUser(String id, String? name, String? photo) async {
     types.User(
       firstName: id,
       id: credential.user!.uid,
-      imageUrl:
-          '${(photo?.contains('http://') ?? true) ? '' : baseImageUrl}${photo ?? ''}',
+      imageUrl: photo?.replaceAll(baseImageUrl, ''),
       lastName: name ?? DateTime.now().toString(),
     ),
   );

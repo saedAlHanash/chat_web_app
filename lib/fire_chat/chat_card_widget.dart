@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/app_widget.dart';
 import 'package:chat_web_app/fire_chat/chat.dart';
@@ -17,6 +16,11 @@ import 'package:image_multi_type/circle_image_widget.dart';
 import 'package:image_multi_type/image_multi_type.dart';
 
 import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
+import 'dart:convert';
+
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../generated/assets.dart';
 
 class ChatCardWidget extends StatefulWidget {
   const ChatCardWidget({
@@ -31,99 +35,118 @@ class ChatCardWidget extends StatefulWidget {
 }
 
 class _ChatCardWidgetState extends State<ChatCardWidget> {
-  Future<void> openRoom(
-    BuildContext context,
-  ) async {
+  Future<void> openRoom(BuildContext context) async {
     if (context.mounted) {
       context.read<GetRoomsCubit>().state.stream?.pause();
-      openRoomFunction(context, widget.room).then((value) {
-        print('sa_____________________________________________________________');
-        roomMessage?.close();
-        context.read<GetRoomsCubit>().state.stream?.resume();
-        setState(() {});
-      });
+      openRoomFunction(context, widget.room).then((value) => setState(() {}));
     }
+  }
+
+  Widget get latestMessage {
+    final json = latestMessagesBox.get(widget.room.id) ?? '{}';
+
+    if (json == '{}') {
+      return const SizedBox();
+    }
+
+    final message = Message.fromJson(jsonDecode(json));
+    switch (message.type) {
+      case MessageType.file:
+        return const DrawableText(
+          text: 'ملف',
+          drawableEnd: ImageMultiType(url: Icons.file_copy),
+        );
+      case MessageType.image:
+        return const DrawableText(
+          text: 'صورة',
+          drawableEnd: ImageMultiType(url: Icons.image),
+        );
+      case MessageType.video:
+        return const DrawableText(
+          text: 'فيديو',
+          drawableEnd: ImageMultiType(url: Icons.videocam_rounded),
+        );
+      case MessageType.text:
+        return DrawableText(
+          text: (message as TextMessage).text,
+          maxLines: 1,
+          size: 12.sp,
+          color: Colors.grey,
+        );
+      case MessageType.audio:
+      case MessageType.custom:
+      case MessageType.system:
+      case MessageType.unsupported:
+    }
+    return const SizedBox();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => openRoom(context),
-      child: Container(
-        height: MediaQuery.of(context).size.height / 6,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 0.1,
-              blurRadius: 8,
-              offset: const Offset(0, 10), // changes position of shadow
-            ),
-          ],
-          borderRadius: BorderRadius.circular(12.0),
-          color: Colors.white,
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListTile(
+        onTap: () => openRoom(context),
+        horizontalTitleGap: 15,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0).r,
+        title: DrawableText(
+         text: getChatMember(widget.room.users).lastName ?? '',
         ),
-        margin:
-            EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height / 162.4),
-        child: Row(children: [
-          Container(
-            width: MediaQuery.of(context).size.width / 6,
-            height: MediaQuery.of(context).size.width / 6,
-            margin: const EdgeInsets.all(10.0),
-            padding: const EdgeInsets.all(3.0),
-            decoration: BoxDecoration(
-              border: Border.all(width: 2, color: Colors.grey),
-              shape: BoxShape.circle,
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: CircleImageWidget(url: getChatMember(widget.room.users).imageUrl),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        leading: CircleImageWidget(
+          size: 250.0.r,
+          url: getChatMember(widget.room.users).firstName == '0'
+              ? Assets.assetsLogo
+              : '$baseImageUrl${getChatMember(widget.room.users).imageUrl}',
+        ),
+        subtitle: latestMessage,
+        trailing: SizedBox(
+          width: 1.0.sw / 4.2,
+          child: Row(
             children: [
-              Text(
-                getChatMember(widget.room.users).lastName ?? '',
-                style: const TextStyle(
-                    color: Color(0xFF565C63), fontSize: 16, fontWeight: FontWeight.bold),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    DrawableText(
+                      text:
+                      DateTime.fromMillisecondsSinceEpoch(
+                        widget.room.updatedAt ?? DateTime.now().millisecond,
+                      ).formatDate,
+                    ),
+                    if (widget.room.isNotReed)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0).r,
+                        child: Icon(
+                          Icons.circle,
+                          size: 40.0.r,
+                          color: const Color(0xffFF6905),
+                        ),
+                      )
+                  ],
+                ),
               ),
-              Text(
-                widget.room.lastMessages?.first.status?.name ?? '',
-                style: const TextStyle(color: Color(0xFFA0A0A0), fontSize: 16),
-              ),
-              const Divider(),
-              DrawableText(
-                  color: Colors.grey,
-                  size: 12.0,
-                  text: DateTime.fromMillisecondsSinceEpoch(
-                          widget.room.updatedAt ?? DateTime.now().millisecond)
-                      .formatDuration())
+             20.0.horizontalSpace,
+              ImageMultiType(
+                url: Icons.arrow_forward_ios_outlined,
+                height: 30.0.r,
+                width: 30.0.r,
+                color: Colors.grey.withOpacity(0.3),
+              )
             ],
           ),
-          if (widget.room.isNotReed) ...[
-            const Spacer(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Icon(
-                Icons.circle,
-                color: mainColor,
-              ),
-            )
-          ]
-        ]),
+        ),
       ),
     );
   }
 }
 
-Future openRoomFunction(BuildContext context, Room room) async {
+Future<void> openRoomFunction(BuildContext context, Room room) async {
   roomMessage = await Hive.openBox<String>(room.id);
 
   if (context.mounted) {
     context.read<GetRoomsCubit>().state.stream?.pause();
-loggerObject.w(isAdmin);
-    return await Navigator.push(
+    loggerObject.w(isAdmin);
+     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
@@ -141,5 +164,11 @@ loggerObject.w(isAdmin);
         },
       ),
     );
+    await  roomMessage?.close();
+    if (context.mounted) {
+      context.read<GetRoomsCubit>().state.stream?.resume();
+    }
+
+    return;
   }
 }

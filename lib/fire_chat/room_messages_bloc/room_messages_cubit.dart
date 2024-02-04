@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 
 import '../../../main.dart';
 
@@ -18,11 +19,12 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
 
   Future<void> getChatRoomMessage(types.Room room) async {
     if (firebaseUser == null) return;
+    emit(state.copyWith(room: room));
     messages(room);
   }
 
   /// Returns a stream of messages from Firebase for a given room.
-  void messages(types.Room room) {
+  Future<void> messages(types.Room room) async {
     var query = FirebaseFirestore.instance
         .collection('rooms/${room.id}/messages')
         .orderBy('createdAt', descending: true)
@@ -48,11 +50,12 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
         data['updatedAt'] = data['updatedAt']?.millisecondsSinceEpoch;
 
         await roomMessage?.put(doc.id, jsonEncode(data));
-
-        newMessages.add(types.Message.fromJson(data));
+        final message = types.Message.fromJson(data);
+        await latestMessagesBox.put(room.id, jsonEncode(data));
+        newMessages.add(message);
       }
 
-      if (!isClosed && roomMessage != null) {
+      if (!isClosed) {
         emit(
           state.copyWith(
             allMessages: roomMessage!.values
@@ -64,7 +67,7 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
       }
     });
 
-    latestUpdateMessagesBox.put(room.id, room.updatedAt ?? 0);
+    await latestUpdateMessagesBox.put(room.id, room.updatedAt ?? 0);
 
     emit(state.copyWith(stream: stream, roomId: room.id));
   }

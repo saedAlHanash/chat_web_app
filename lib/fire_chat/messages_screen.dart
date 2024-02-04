@@ -96,6 +96,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 );
               },
               itemCount: state.allRooms.length,
+
               itemBuilder: (context, i) {
                 final openRoom = state.allRooms[i];
                 return isAdmin
