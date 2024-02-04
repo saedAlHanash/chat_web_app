@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/fire_chat/room_messages_bloc/room_messages_cubit.dart';
+import 'package:chat_web_app/fire_chat/src/chat_theme.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
 import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
@@ -23,6 +25,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../main.dart';
+import '../app_widget.dart';
 import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_room_object.dart';
 import 'src/widgets/chat.dart';
@@ -65,12 +68,12 @@ class _ChatPageState extends State<ChatPage> {
     if (cubit.state.allMessages.isNotEmpty) {
       final m = cubit.state.allMessages.first;
 
-      latestUpdateMessagesBox.put(cubit.state.roomId, m.updatedAt ?? 0);
+      latestUpdateMessagesBox?.put(cubit.state.roomId, m.updatedAt ?? 0);
       var room =
-          types.Room.fromJson(jsonDecode(roomsBox.get(cubit.state.roomId) ?? '{}'));
+          types.Room.fromJson(jsonDecode(roomsBox?.get(cubit.state.roomId) ?? '{}'));
       if (room.updatedAt == m.updatedAt) return;
       room = room.copyWith(updatedAt: m.updatedAt);
-      roomsBox.put(cubit.state.roomId, jsonEncode(room));
+      roomsBox?.put(cubit.state.roomId, jsonEncode(room));
       context.read<GetRoomsCubit>().updateRooms();
     }
 
@@ -223,8 +226,7 @@ class _ChatPageState extends State<ChatPage> {
       sendNotificationMessage(
         myRoomObject,
         ChatNotification(
-          body: message.text,
-        ),
+            body: message.text, title: 'رسالة جديدة', fcm: myRoomObject.fcmToken),
       ).then(
         (value) {
           if (value) {
@@ -247,33 +249,30 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-
         title: !isAdmin
             ? Text(widget.name)
             : Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            DrawableText(
-              size: 20.0,
-              text: widget.room.users.first.lastName.toString(),
-              color: Colors.black,
-            ),
-            const Text(' | '),
-            DrawableText(
-              size: 20.0,
-              text: widget.room.users.last.lastName.toString(),
-              color: Colors.black,
-            ),
-          ],
-        ),
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  DrawableText(
+                    size: 20.0.sp,
+                    text: widget.room.users.first.lastName.toString(),
+                    color: Colors.black,
+                  ),
+                  const Text(' | '),
+                  DrawableText(
+                    size: 20.0.sp,
+                    text: widget.room.users.last.lastName.toString(),
+                    color: Colors.black,
+                  ),
+                ],
+              ),
       ),
       body: BlocBuilder<RoomMessagesCubit, RoomMessagesInitial>(
         builder: (context, state) {
@@ -284,12 +283,43 @@ class _ChatPageState extends State<ChatPage> {
             onMessageTap: _handleMessageTap,
             onPreviewDataFetched: _handlePreviewDataFetched,
             onSendPressed: _handleSendPressed,
-            customBottomWidget: !isAdmin ? null : const SizedBox(),
-            user: !isAdmin
-                ? types.User(
-              id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
-            )
-                : widget.room.users.last,
+            theme: DefaultChatTheme(
+              inputBackgroundColor: Colors.white,
+              inputTextColor: mainColor,
+              inputTextDecoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0).r,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(200),
+                  gapPadding: 0,
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(200),
+                  gapPadding: 0,
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(200),
+                  gapPadding: 0,
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(200),
+                  gapPadding: 0,
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+              ),
+              inputContainerDecoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Color(0xffB8B8D2)),
+                ),
+              ),
+              inputPadding: const EdgeInsets.symmetric(vertical: 10.0).h,
+            ),
+            user: types.User(
+              id: firebaseUser?.uid ?? '',
+            ),
           );
         },
       ),
@@ -305,7 +335,7 @@ void showLoadingDialog(BuildContext context) {
       return Dialog(
         child: Container(
           padding: EdgeInsets.all(16.0),
-          child: Column(
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(),
@@ -331,13 +361,10 @@ Future<Uint8List?> fetchImage(String imageUrl) async {
   final imageFromCash = hiveFilesBox?.get(imageUrl);
 
   if (imageFromCash != null) {
-
-
     return imageFromCash;
   }
 
   try {
-
     final response = await http.get(
       Uri.parse(
         'https://api.allorigins.win/raw?url=$imageUrl',

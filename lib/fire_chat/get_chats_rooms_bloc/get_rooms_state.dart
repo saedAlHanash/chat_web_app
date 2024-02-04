@@ -18,7 +18,7 @@ class GetRoomsInitial {
   });
 
   factory GetRoomsInitial.initial() {
-    final allFromHive = roomsBox.values.map((e) {
+    final allFromHive = roomsBox!.values.map((e) {
       return types.Room.fromJson(jsonDecode(e));
     }).toList()
       ..sort((a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0));

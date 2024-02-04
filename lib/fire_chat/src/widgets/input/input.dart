@@ -68,7 +68,7 @@ class _InputState extends State<Input> {
     },
   );
 
-  bool _sendButtonVisible = false;
+
   late TextEditingController _textController;
 
   @override
@@ -84,13 +84,12 @@ class _InputState extends State<Input> {
     _textController.removeListener(_handleTextControllerChange);
     if (widget.options.sendButtonVisibilityMode ==
         SendButtonVisibilityMode.hidden) {
-      _sendButtonVisible = false;
+
     } else if (widget.options.sendButtonVisibilityMode ==
         SendButtonVisibilityMode.editing) {
-      _sendButtonVisible = _textController.text.trim() != '';
       _textController.addListener(_handleTextControllerChange);
     } else {
-      _sendButtonVisible = true;
+
     }
   }
 
@@ -110,9 +109,6 @@ class _InputState extends State<Input> {
     if (_textController.value.isComposingRangeValid) {
       return;
     }
-    setState(() {
-      _sendButtonVisible = _textController.text.trim() != '';
-    });
   }
 
   Widget _inputBuilder() {
@@ -132,15 +128,7 @@ class _InputState extends State<Input> {
     final textPadding = InheritedChatTheme.of(context)
         .theme
         .inputPadding
-        .copyWith(left: 0, right: 0)
-        .add(
-          EdgeInsets.fromLTRB(
-            widget.onAttachmentPressed != null ? 0 : 24,
-            0,
-            _sendButtonVisible ? 0 : 24,
-            0,
-          ),
-        );
+        .copyWith(left: 0, right: 0);
 
     return Focus(
       autofocus: !widget.options.autofocus,
@@ -166,7 +154,7 @@ class _InputState extends State<Input> {
                     padding: buttonPadding,
                   ),
                 Expanded(
-                  child: Padding(
+                  child: Container(
                     padding: textPadding,
                     child: TextField(
                       enabled: widget.options.enabled,
@@ -190,8 +178,7 @@ class _InputState extends State<Input> {
                                       .inputTextColor
                                       .withOpacity(0.5),
                                 ),
-                            hintText:
-                                InheritedL10n.of(context).l10n.inputPlaceholder,
+
                           ),
                       focusNode: _inputFocusNode,
                       keyboardType: widget.options.keyboardType,
@@ -211,17 +198,9 @@ class _InputState extends State<Input> {
                     ),
                   ),
                 ),
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: buttonPadding.bottom + buttonPadding.top + 24,
-                  ),
-                  child: Visibility(
-                    visible: _sendButtonVisible,
-                    child: SendButton(
-                      onPressed: _handleSendPressed,
-                      padding: buttonPadding,
-                    ),
-                  ),
+                SendButton(
+                  onPressed: _handleSendPressed,
+                  padding: buttonPadding,
                 ),
               ],
             ),

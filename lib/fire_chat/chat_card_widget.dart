@@ -43,7 +43,7 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
   }
 
   Widget get latestMessage {
-    final json = latestMessagesBox.get(widget.room.id) ?? '{}';
+    final json = latestMessagesBox?.get(widget.room.id) ?? '{}';
 
     if (json == '{}') {
       return const SizedBox();
@@ -85,54 +85,70 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: ListTile(
+      child: InkWell(
         onTap: () => openRoom(context),
-        horizontalTitleGap: 15,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0).r,
-        title: DrawableText(
-         text: getChatMember(widget.room.users).lastName ?? '',
-        ),
-        leading: CircleImageWidget(
-          size: 250.0.r,
-          url: getChatMember(widget.room.users).firstName == '0'
-              ? Assets.assetsLogo
-              : '$baseImageUrl${getChatMember(widget.room.users).imageUrl}',
-        ),
-        subtitle: latestMessage,
-        trailing: SizedBox(
-          width: 1.0.sw / 4.2,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
+        child: SizedBox(
+          height: 150.0.h,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0).r,
+            child: Row(
+              children: [
+                CircleImageWidget(
+                  size: 150.0.r,
+                  url: getChatMember(widget.room.users).firstName == '0'
+                      ? Assets.assetsLogo
+                      : '$baseImageUrl${getChatMember(widget.room.users).imageUrl}',
+                ),
+                30.0.horizontalSpace,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    DrawableText(
+                      text: getChatMember(widget.room.users).lastName ?? '',
+                      size: 12.0.sp,
+                      drawableStart: ImageMultiType(
+                        url: Icons.person,
+                        color: Colors.black,
+                        height: 22.0.r,
+                        width: 22.0.r,
+                      ),
+                    ),
+                    Spacer(),
+                    latestMessage,
+                  ],
+                ),
+                Spacer(),
+                Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     DrawableText(
-                      text:
-                      DateTime.fromMillisecondsSinceEpoch(
+                      text: DateTime.fromMillisecondsSinceEpoch(
                         widget.room.updatedAt ?? DateTime.now().millisecond,
                       ).formatDate,
+                      color: const Color(0xff8E8E93),
+                      size: 12.0.sp,
                     ),
                     if (widget.room.isNotReed)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0).r,
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Icon(
                           Icons.circle,
-                          size: 40.0.r,
+                          size: 30.0.r,
                           color: const Color(0xffFF6905),
                         ),
                       )
                   ],
                 ),
-              ),
-             20.0.horizontalSpace,
-              ImageMultiType(
-                url: Icons.arrow_forward_ios_outlined,
-                height: 30.0.r,
-                width: 30.0.r,
-                color: Colors.grey.withOpacity(0.3),
-              )
-            ],
+                25.0.horizontalSpace,
+                ImageMultiType(
+                  url: Icons.arrow_forward_ios_outlined,
+                  height: 30.0.r,
+                  width: 30.0.r,
+                  color: Colors.grey.withOpacity(0.3),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -146,7 +162,7 @@ Future<void> openRoomFunction(BuildContext context, Room room) async {
   if (context.mounted) {
     context.read<GetRoomsCubit>().state.stream?.pause();
     loggerObject.w(isAdmin);
-     await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
@@ -164,7 +180,7 @@ Future<void> openRoomFunction(BuildContext context, Room room) async {
         },
       ),
     );
-    await  roomMessage?.close();
+    await roomMessage?.close();
     if (context.mounted) {
       context.read<GetRoomsCubit>().state.stream?.resume();
     }

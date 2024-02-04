@@ -32,7 +32,6 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
         .orderBy('updatedAt', descending: true);
 
     if (!isAdmin) {
-
       query.where(
         'userIds',
         arrayContains: firebaseUser?.uid,
@@ -89,14 +88,14 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   }
 
   List<types.Room> get getRoomsFromHive {
-    return roomsBox.values.map((e) {
+    return roomsBox!.values.map((e) {
       return types.Room.fromJson(jsonDecode(e));
     }).toList();
   }
 
   Future<void> storeRoomsInHive(List<types.Room> rooms) async {
     for (var e in rooms) {
-      await roomsBox.put(e.id, jsonEncode(e));
+      await roomsBox?.put(e.id, jsonEncode(e));
     }
   }
 

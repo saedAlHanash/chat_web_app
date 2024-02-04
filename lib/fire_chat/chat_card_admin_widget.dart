@@ -39,7 +39,7 @@ class _ChatCardAdminWidgetState extends State<ChatCardAdminWidget> {
   }
 
   Widget get latestMessage {
-    final json = latestMessagesBox.get(widget.room.id) ?? '{}';
+    final json = latestMessagesBox?.get(widget.room.id) ?? '{}';
 
     if (json == '{}') {
       return const SizedBox();

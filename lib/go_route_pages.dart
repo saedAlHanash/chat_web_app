@@ -21,7 +21,6 @@ String userTypeFromUrl = '';
 
 final appGoRouter = GoRouter(
   routes: <GoRoute>[
-
     ///messages
     GoRoute(
       name: GoRouteName.messages,
@@ -29,9 +28,7 @@ final appGoRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) =>
-            GetRoomsCubit()
-              ..getChatRooms()),
+            BlocProvider(create: (_) => GetRoomsCubit()..getChatRooms()),
           ],
           child: const MessagesScreen(),
         );
@@ -52,7 +49,8 @@ final appGoRouter = GoRouter(
         userTypeFromUrl = state.queryParams['type'] ?? '';
 
         var userChanged = false;
-        if (AppSharedPreference.getMyId != userIdFromUrl) {
+        if (AppSharedPreference.getMyId != userIdFromUrl ||
+            AppSharedPreference.getTypeId != userTypeFromUrl) {
           userChanged = true;
           AppSharedPreference.cashMyId(userIdFromUrl);
           AppSharedPreference.cashToken(userTokenFromUrl);
@@ -75,9 +73,9 @@ final appGoRouter = GoRouter(
                   context.pushNamed(
                     GoRouteName.loadData,
                     queryParams: {
-                      'id': '0',
-                      'name': 'admin',
-                      'type': 'a',
+                      'id': '73',
+                      'name': 'saed',
+                      'type': 's',
                       'token': '889|R9yJZkErCt0wsd6oP0DfOhHlV7MVPoucFV5BsL41',
                     },
                   );
@@ -91,18 +89,14 @@ final appGoRouter = GoRouter(
 );
 
 class GoRouteName {
-
   static const messages = 'Message';
   static const loadData = 'LoadData';
   static const homePage = 'homePage';
-
 }
 
 class _GoRoutePath {
-
   static const homePage = '/';
 
   static const loadData = '/loadData';
   static const messages = '/messages';
-
 }

@@ -52,7 +52,7 @@ class AttachmentButton extends StatelessWidget {
                 )
               : InheritedChatTheme.of(context).theme.attachmentButtonIcon ??
                   ImageMultiType(
-                    url: Icons.file_copy_outlined,
+                    url: Icons.add,
                     color: InheritedChatTheme.of(context).theme.inputTextColor,
                   ),
           onPressed: isLoading ? null : onPressed,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:image_multi_type/image_multi_type.dart';
-import 'package:chat_web_app/generated/assets.dart';
 
 import '../../util.dart';
 import '../state/inherited_chat_theme.dart';
@@ -58,7 +57,7 @@ class FileMessage extends StatelessWidget {
                   InheritedChatTheme.of(context).theme.documentIcon != null
                       ? InheritedChatTheme.of(context).theme.documentIcon!
                       : ImageMultiType(
-                          url: Assets.assetsIconDocument,
+                          url: Icons.file_copy,
                           color: color,
                         ),
                 ],

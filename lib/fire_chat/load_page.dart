@@ -36,6 +36,9 @@ class _LoadDataState extends State<LoadData> {
     await logoutChatUser();
     await initFirebaseChat();
     if (mounted) {
+      await initFirebaseChatAfterLogin(context);
+    }
+    if (mounted) {
       context.pushReplacementNamed(GoRouteName.messages);
     }
   }

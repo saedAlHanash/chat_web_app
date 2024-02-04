@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_multi_type/image_multi_type.dart';
 
 import '../../../../../generated/assets.dart';
@@ -21,28 +22,20 @@ class SendButton extends StatelessWidget {
   final EdgeInsets padding;
 
   @override
-  Widget build(BuildContext context) => Container(
-        margin: InheritedChatTheme.of(context).theme.sendButtonMargin ??
-            const EdgeInsetsDirectional.fromSTEB(0, 0, 8, 0),
-        child: Semantics(
-          label: InheritedL10n.of(context).l10n.sendButtonAccessibilityLabel,
-          child: IconButton(
-            constraints: const BoxConstraints(
-              minHeight: 24,
-              minWidth: 24,
-            ),
-            icon: InheritedChatTheme.of(context).theme.sendButtonIcon ??
-                 ImageMultiType(
-                  url: Assets.svgSend,
-                  color: InheritedChatTheme.of(context).theme.inputTextColor,
-                   
-                ),
-            onPressed: onPressed,
-            padding: padding,
-            splashRadius: 24,
-            tooltip:
-                InheritedL10n.of(context).l10n.sendButtonAccessibilityLabel,
+  Widget build(BuildContext context) => Semantics(
+    label: InheritedL10n.of(context).l10n.sendButtonAccessibilityLabel,
+    child: IconButton(
+      icon: InheritedChatTheme.of(context).theme.sendButtonIcon ??
+           ImageMultiType(
+            url: Assets.svgSend,
+            color: InheritedChatTheme.of(context).theme.inputTextColor,
+
           ),
-        ),
-      );
+      onPressed: onPressed,
+      padding: const EdgeInsets.symmetric(horizontal: 15.0).w,
+      splashRadius: 24,
+      tooltip:
+          InheritedL10n.of(context).l10n.sendButtonAccessibilityLabel,
+    ),
+  );
 }

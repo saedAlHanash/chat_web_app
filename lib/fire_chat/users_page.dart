@@ -57,7 +57,12 @@ class _UsersPageState extends State<UsersPage> {
                     height: 100.0,
                     width: 100.0,
                   ),
-                  DrawableText(text: 'لا يوجد بيانات')
+                  DrawableText(
+                    textAlign: TextAlign.center,
+                    text:
+                        'عذرًا، لا يوجد أي دورة نشطة حاليًا أو مشتركين في المحادثة. يُرجى التأكد من أنك مشترك في دورة قبل محاولة إنشاء محادثة.'
+                        '\n إذا كنت قد تمت دعوتك إلى دورة معينة، يرجى الانتظار حتى يتم إضافتك إليها من',
+                  )
                 ],
               ),
             );

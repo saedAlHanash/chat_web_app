@@ -51,7 +51,7 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
 
         await roomMessage?.put(doc.id, jsonEncode(data));
         final message = types.Message.fromJson(data);
-        await latestMessagesBox.put(room.id, jsonEncode(data));
+        await latestMessagesBox?.put(room.id, jsonEncode(data));
         newMessages.add(message);
       }
 
@@ -67,7 +67,7 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
       }
     });
 
-    await latestUpdateMessagesBox.put(room.id, room.updatedAt ?? 0);
+    await latestUpdateMessagesBox?.put(room.id, room.updatedAt ?? 0);
 
     emit(state.copyWith(stream: stream, roomId: room.id));
   }

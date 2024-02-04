@@ -47,7 +47,7 @@ class APIService {
 
   final innerHeader = {
     'Content-Type': 'application/json',
-    // 'Accept': '*/*',
+    'Accept': 'application/json',
     // 'origin': 'x-requested-with',
     // 'X-Frame-Options': 'SAMEORIGIN',
     // 'x-cors-api-key': 'temp_ddc55961defc6c4343f28eec36c009da',
@@ -195,7 +195,7 @@ class APIService {
     innerHeader.addAll(header ?? {});
 
     final uri = Uri.https(hostName ?? baseUrl, url, query);
-
+    loggerObject.w(uri);
     logRequest(url, (body ?? {})..addAll(query ?? {}));
 
     try {
@@ -330,6 +330,7 @@ class APIService {
     innerHeader.addAll(header ?? {});
     final uri = Uri.https(baseUrl, '$url/${path ?? ''}');
 
+    loggerObject.w(uri);
     var request = http.MultipartRequest(type, uri);
 
     logRequest(url, fields, additional: files?.firstOrNull?.nameField);
