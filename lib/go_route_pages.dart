@@ -49,7 +49,8 @@ final appGoRouter = GoRouter(
         userTypeFromUrl = state.queryParams['type'] ?? '';
 
         var userChanged = false;
-        if (AppSharedPreference.getMyId != userIdFromUrl) {
+        if (AppSharedPreference.getMyId != userIdFromUrl ||
+            AppSharedPreference.getTypeId != userTypeFromUrl) {
           userChanged = true;
           AppSharedPreference.cashMyId(userIdFromUrl);
           AppSharedPreference.cashToken(userTokenFromUrl);
