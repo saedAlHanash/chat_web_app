@@ -1,4 +1,5 @@
 import 'package:chat_web_app/api_manager/api_service.dart';
+import 'package:chat_web_app/api_manager/api_url.dart';
 import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
 import 'package:flutter/material.dart';
@@ -11,13 +12,7 @@ import 'fire_chat/load_page.dart';
 import 'fire_chat/messages_screen.dart';
 import 'fire_chat/my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
 
-int initialTapNumber = 0;
-
-String userIdFromUrl = '';
-String userNameFromUrl = '';
-String userPhotoFromUrl = '';
-String userTokenFromUrl = '';
-String userTypeFromUrl = '';
+var metaQuery = MetaQuery.fromJson({});
 
 final appGoRouter = GoRouter(
   routes: <GoRoute>[
@@ -41,23 +36,9 @@ final appGoRouter = GoRouter(
       path: _GoRoutePath.loadData,
       builder: (BuildContext context, GoRouterState state) {
         if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
-
-        userIdFromUrl = state.queryParams['id'] ?? '';
-        userNameFromUrl = state.queryParams['name'] ?? '';
-        userPhotoFromUrl = state.queryParams['photo'] ?? '';
-        userTokenFromUrl = state.queryParams['token'] ?? '';
-        userTypeFromUrl = state.queryParams['type'] ?? '';
-
-        var userChanged = false;
-        if (AppSharedPreference.getMyId != userIdFromUrl ||
-            AppSharedPreference.getTypeId != userTypeFromUrl) {
-          userChanged = true;
-          AppSharedPreference.cashMyId(userIdFromUrl);
-          AppSharedPreference.cashToken(userTokenFromUrl);
-          AppSharedPreference.cashTypeId(userTypeFromUrl);
-        }
-
-        return LoadData(userChanged: userChanged);
+        // metaQuery = MetaQuery.fromJson(test);
+        metaQuery = MetaQuery.fromJson(state.queryParams);
+        return LoadData(userChanged: AppSharedPreference.cashMetta(metaQuery));
       },
     ),
 
@@ -99,4 +80,48 @@ class _GoRoutePath {
 
   static const loadData = '/';
   static const messages = '/messages';
+}
+
+class MetaQuery {
+  final String userId;
+  final String userName;
+  final String userPhoto;
+  final String userToken;
+  final String userType;
+  final String userFcm;
+  final String domain;
+
+  MetaQuery({
+    required this.userId,
+    required this.userName,
+    required this.userPhoto,
+    required this.userToken,
+    required this.userType,
+    required this.userFcm,
+    required this.domain,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': userId,
+      'name': userName,
+      'photo': userPhoto,
+      'token': userToken,
+      'type': userType,
+      'fcm': userFcm,
+      'domain': domain,
+    };
+  }
+
+  factory MetaQuery.fromJson(Map<String, dynamic> map) {
+    return MetaQuery(
+      userId: map['id'] ?? '',
+      userName: map['name'] ?? '',
+      userPhoto: map['photo'] ?? '',
+      userToken: map['token'] ?? '',
+      userType: map['type'] ?? '',
+      userFcm: map['fcm'] ?? '',
+      domain: map['domain'] ?? '',
+    );
+  }
 }

@@ -1,6 +1,11 @@
+import 'package:chat_web_app/util/shared_preferences.dart';
 
 String get baseUrl {
-  return 'manage.almas.education';
-  // return liveUrl;
+  final cachedDomain = AppSharedPreference.myMetta.domain;
+  return cachedDomain.isEmpty ? liveUrl : testUrl;
 }
 
+bool get isTestDomain => !baseUrl.contains('manage');
+
+const testUrl = 'lms.almas.education';
+const liveUrl = 'manage.almas.education';

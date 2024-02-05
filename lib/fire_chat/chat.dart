@@ -58,6 +58,7 @@ class _ChatPageState extends State<ChatPage> {
     myRoomObject = MyRoomObject(
       roomId: widget.room.id,
       fcmToken: (getChatMember(widget.room.users).metadata ?? {})['fcm'] ?? '',
+      fcmTokenWeb: (getChatMember(widget.room.users).metadata ?? {})['fcm_web'] ?? '',
     );
     cubit = context.read<RoomMessagesCubit>();
     super.initState();
@@ -226,7 +227,11 @@ class _ChatPageState extends State<ChatPage> {
       sendNotificationMessage(
         myRoomObject,
         ChatNotification(
-            body: message.text, title: 'رسالة جديدة', fcm: myRoomObject.fcmToken),
+          body: message.text,
+          title: 'رسالة جديدة',
+          fcm: myRoomObject.fcmToken,
+          fcmWeb: myRoomObject.fcmTokenWeb,
+        ),
       ).then(
         (value) {
           if (value) {

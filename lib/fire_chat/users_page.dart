@@ -45,7 +45,7 @@ class _UsersPageState extends State<UsersPage> {
       body: BlocBuilder<ChatUsersCubit, ChatUsersInitial>(
         builder: (context, state) {
           if (state.statuses.loading) {
-            return const CircularProgressIndicator.adaptive();
+            return const Center(child: CircularProgressIndicator.adaptive());
           }
           if (state.result.isEmpty) {
             return const Center(

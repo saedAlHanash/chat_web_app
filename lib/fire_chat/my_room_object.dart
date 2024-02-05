@@ -2,10 +2,12 @@ class MyRoomObject {
   String roomId;
   bool needToSendNotification;
   String fcmToken;
+  String fcmTokenWeb;
 
   MyRoomObject({
     this.roomId = "",
     this.fcmToken = "",
+    this.fcmTokenWeb = "",
     this.needToSendNotification = true,
   });
 }
@@ -14,12 +16,14 @@ class ChatNotification {
   String body;
   String title;
   String fcm;
+  String fcmWeb;
 
 
   ChatNotification({
     required this.body,
     required this.title,
     required this.fcm,
+    required this.fcmWeb,
   });
 
 
@@ -27,16 +31,11 @@ class ChatNotification {
     return {
       "body": body,
       "title": title,
-      "fcm": fcm,
+      if (fcm.isNotEmpty) "fcm_token[0]": fcm,
+      if (fcmWeb.isNotEmpty) "fcm_token[${fcm.isEmpty ? '0' : '1'}]": fcmWeb,
     };
   }
 
-  factory ChatNotification.fromMap(Map<String, dynamic> map) {
-    return ChatNotification(
-      body: map["body"] as String,
-      title: map["title"] as String,
-      fcm: map["fcm"] as String,
-    );
-  }
+
 
 }

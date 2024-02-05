@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:chat_web_app/api_manager/api_service.dart';
+import 'package:chat_web_app/api_manager/api_url.dart';
+import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -98,50 +100,61 @@ types.User getChatMember(List<types.User> list, {bool? me}) {
 
 Future<bool> isChatUserFound(String id) async {
   for (var e in await getChatUsers()) {
-    if (e.firstName == id) return true;
+    if (e.firstName == '${isTestDomain ? 'test' : ''}$id') return true;
   }
   return false;
 }
 
-Future<void> createChatUser(String id, String? name, String? photo) async {
+Future<void> createChatUser() async {
+  final meta = AppSharedPreference.myMetta;
   try {
     final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: 'LMS.$id@LMS.com',
-      password: 'LMS${id}LMS',
+      email: 'LMS${isTestDomain ? 'test' : ''}.${meta.userId}@LMS.com',
+      password: 'LMS${meta.userId}LMS',
     );
 
     await FirebaseChatCore.instance.createUserInFirestore(
       types.User(
-        firstName: id,
+        firstName: '${isTestDomain ? 'test' : ''}${meta.userId}',
         id: credential.user!.uid,
-        imageUrl: photo?.replaceAll(baseImageUrl, ''),
-        lastName: name ?? DateTime.now().toString(),
+        imageUrl: meta.userPhoto.replaceAll(baseImageUrl, ''),
+        lastName: meta.userName,
+        metadata: {'fcm_web': meta.userFcm},
       ),
     );
   } on Exception catch (e) {
     if (e.toString().contains('email address is already')) {
-      await loginChatUser(id, name, photo);
+      await loginChatUser();
     }
   }
 }
 
-Future<void> loginChatUser(String id, String? name, String? photo) async {
+Future<void> loginChatUser() async {
+  final meta = AppSharedPreference.myMetta;
   var credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-    email: 'LMS.$id@LMS.com',
-    password: 'LMS${id}LMS',
+    email: 'LMS${isTestDomain ? 'test' : ''}.${meta.userId}@LMS.com',
+    password: 'LMS${meta.userId}LMS',
   );
 
   await FirebaseChatCore.instance.createUserInFirestore(
     types.User(
-      firstName: id,
+      firstName: '${isTestDomain ? 'test' : ''}${meta.userId}',
       id: credential.user!.uid,
-      imageUrl: photo?.replaceAll(baseImageUrl, ''),
-      lastName: name ?? DateTime.now().toString(),
+      imageUrl: meta.userPhoto.replaceAll(baseImageUrl, ''),
+      lastName: meta.userName,
+      metadata: {'fcm_web': meta.userFcm},
     ),
   );
 }
 
 Future<void> logoutChatUser() async {
+  if (firebaseUser != null) {
+    await FirebaseFirestore.instance.collection('users').doc(firebaseUser?.uid).update(
+      {
+        'metadata': {'fcm_web': ''}
+      },
+    );
+  }
   loggerObject.w('logout');
   await roomsBox?.clear();
   await reInitialBoxes();
@@ -149,53 +162,33 @@ Future<void> logoutChatUser() async {
 }
 
 Future<void> initFirebaseChat() async {
+  final meta = AppSharedPreference.myMetta;
   try {
-    if (await isChatUserFound(userIdFromUrl)) {
-      await loginChatUser(userIdFromUrl, userNameFromUrl, userPhotoFromUrl);
+    if (await isChatUserFound(meta.userId)) {
+      await loginChatUser();
       return;
     } else {
-      await createChatUser(userIdFromUrl, userNameFromUrl, userPhotoFromUrl);
+      await createChatUser();
     }
   } on Exception catch (e) {
-    print(e);
+    loggerObject.e(e);
   }
   return;
 }
 
-Future<void> initFirebaseChatAfterLogin(BuildContext context) async {
-  final id = userIdFromUrl;
-  final name = userNameFromUrl;
-  final photo = userPhotoFromUrl;
-
-  try {
-    if (await isChatUserFound(id.toString() ?? '')) {
-      await loginChatUser(id.toString(), name, photo);
-    } else {
-      await createChatUser(id.toString(), name, photo);
-    }
-  } on Exception catch (e) {
-    if (firebaseUser != null && context.mounted) {
-      context.read<GetRoomsCubit>().getChatRooms();
-    }
-  }
-
-  if (firebaseUser != null && context.mounted) {
-    context.read<GetRoomsCubit>().getChatRooms();
-  }
-}
-
 Future<bool> sendNotificationMessage(
     MyRoomObject myRoomObject, ChatNotification message) async {
-  if (myRoomObject.fcmToken.isEmpty) return false;
+  if (myRoomObject.fcmToken.isEmpty && myRoomObject.fcmTokenWeb.isEmpty) return false;
 
   if (message.body.length > 100) {
     message.body = message.body.substring(0, 99);
   }
 
-  final result = await APIService().postApi(
+  final result = await APIService().uploadMultiPart(
     url: 'api/send',
-    body: message.toJson(),
+    fields: message.toJson(),
   );
+
   return result.statusCode == 200;
 }
 

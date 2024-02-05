@@ -32,7 +32,7 @@ Future<void> main() async {
 
   runApp(MultiBlocProvider(
     providers: [
-      BlocProvider(create: (_) => ChatUsersCubit()..getChatUsers()),
+      BlocProvider(create: (_) => ChatUsersCubit()),
     ],
     child: MyApp(),
   ));

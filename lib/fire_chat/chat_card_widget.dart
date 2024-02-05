@@ -15,6 +15,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_multi_type/circle_image_widget.dart';
 import 'package:image_multi_type/image_multi_type.dart';
 
+import '../api_manager/api_url.dart';
 import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'dart:convert';
 
@@ -95,7 +96,7 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
               children: [
                 CircleImageWidget(
                   size: 150.0.r,
-                  url: getChatMember(widget.room.users).firstName == '0'
+                  url: getChatMember(widget.room.users).firstName == '${isTestDomain ? 'test' : ''}0'
                       ? Assets.assetsLogo
                       : '$baseImageUrl${getChatMember(widget.room.users).imageUrl}',
                 ),

@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 
+import '../../api_manager/api_url.dart';
 import '../util.dart';
 
 part 'get_rooms_state.dart';
@@ -42,6 +43,7 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
               getLatestUpdatedFromHive,
             ),
           );
+
     } else {
       query = FirebaseFirestore.instance
           .collection('rooms')
@@ -116,14 +118,14 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
     if (id == null) return null;
     for (var e in state.allRooms) {
       for (var e1 in e.users) {
-        if (e1.firstName == id) {
+        if (e1.firstName == '${isTestDomain ? 'test' : ''}$id') {
           return e;
         }
       }
     }
 
     for (var e in await getChatUsers()) {
-      if (e.firstName == id) {
+      if (e.firstName == '${isTestDomain ? 'test' : ''}$id') {
         var newRoom = await FirebaseChatCore.instance.createRoom(e);
 
         return newRoom;
