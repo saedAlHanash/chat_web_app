@@ -67,13 +67,14 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
         snapshot,
         'users',
       );
-      for (var e in listRooms) {
-        final json = latestMessagesBox?.get(e.id);
-        if (json == null || json.isEmpty) continue;
-        final message = types.Message.fromJson(jsonDecode(json));
-        await latestMessagesBox?.put(e.id,
-            jsonEncode((message as types.TextMessage).copyWith(text: 'رسالة جديدة')));
-      }
+
+      // for (var e in listRooms) {
+      //   final json = latestMessagesBox?.get(e.id);
+      //   if (json == null || json.isEmpty) continue;
+      //   final message = types.Message.fromJson(jsonDecode(json));
+      //   await latestMessagesBox?.put(e.id,
+      //       jsonEncode((message as types.TextMessage).copyWith(text: 'رسالة جديدة')));
+      // }
 
       await storeRoomsInHive(listRooms);
 
