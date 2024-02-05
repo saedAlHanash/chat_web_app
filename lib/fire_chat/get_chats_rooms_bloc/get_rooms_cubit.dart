@@ -46,7 +46,6 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
               getLatestUpdatedFromHive,
             ),
           );
-
     } else {
       query = FirebaseFirestore.instance
           .collection('rooms')
@@ -59,9 +58,7 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
           );
     }
 
-    if (state.stream != null) {
-      state.stream!.cancel();
-    }
+
 
     final stream = query.snapshots().listen((snapshot) async {
       final listRooms = await processRoomsQuery(
@@ -70,6 +67,13 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
         snapshot,
         'users',
       );
+      for (var e in listRooms) {
+        final json = latestMessagesBox?.get(e.id);
+        if (json == null || json.isEmpty) continue;
+        final message = types.Message.fromJson(jsonDecode(json));
+        await latestMessagesBox?.put(e.id,
+            jsonEncode((message as types.TextMessage).copyWith(text: 'رسالة جديدة')));
+      }
 
       await storeRoomsInHive(listRooms);
 

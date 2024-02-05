@@ -50,8 +50,7 @@ class APIService {
   Map<String, String> get innerHeader => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization':
-            'Bearer ${AppSharedPreference.myMetta.userToken}',
+        'Authorization': 'Bearer ${AppSharedPreference.myMetta.userToken}',
       };
 
   APIService._internal();
@@ -317,7 +316,6 @@ class APIService {
 
   Future<http.Response> uploadMultiPart({
     required String url,
-    String? path,
     String type = 'POST',
     List<UploadFile?>? files,
     Map<String, dynamic>? fields,
@@ -328,7 +326,7 @@ class APIService {
     (fields ?? {}).forEach((key, value) => f[key] = value.toString());
 
     innerHeader.addAll(header ?? {});
-    final uri = Uri.https(baseUrl, '$url/${path ?? ''}');
+    final uri = Uri.https(baseUrl, url);
 
     loggerObject.w(uri);
     var request = http.MultipartRequest(type, uri);
@@ -359,7 +357,8 @@ class APIService {
       logResponse(url, response);
       _serverDate = getDateTimeFromHeaders(response);
       return response;
-    } on Exception {
+    } on Exception catch (e) {
+      loggerObject.e(e);
       return http.Response('{}', 481);
     }
   }

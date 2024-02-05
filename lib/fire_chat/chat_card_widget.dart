@@ -38,7 +38,6 @@ class ChatCardWidget extends StatefulWidget {
 class _ChatCardWidgetState extends State<ChatCardWidget> {
   Future<void> openRoom(BuildContext context) async {
     if (context.mounted) {
-      context.read<GetRoomsCubit>().state.stream?.pause();
       openRoomFunction(context, widget.room).then((value) => setState(() {}));
     }
   }
@@ -71,7 +70,7 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
         return DrawableText(
           text: (message as TextMessage).text,
           maxLines: 1,
-          size: 12.sp,
+          size: 20.0.sp,
           color: Colors.grey,
         );
       case MessageType.audio:
@@ -108,7 +107,7 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
                   children: [
                     DrawableText(
                       text: getChatMember(widget.room.users).lastName ?? '',
-                      size: 12.0.sp,
+                      size: 20.0.sp,
                       drawableStart: ImageMultiType(
                         url: Icons.person,
                         color: Colors.black,
@@ -116,20 +115,19 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
                         width: 22.0.r,
                       ),
                     ),
-                    Spacer(),
                     latestMessage,
                   ],
                 ),
                 Spacer(),
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     DrawableText(
                       text: DateTime.fromMillisecondsSinceEpoch(
                         widget.room.updatedAt ?? DateTime.now().millisecond,
                       ).formatDate,
                       color: const Color(0xff8E8E93),
-                      size: 12.0.sp,
+                      size: 20.0.sp,
                     ),
                     if (widget.room.isNotReed)
                       Padding(
