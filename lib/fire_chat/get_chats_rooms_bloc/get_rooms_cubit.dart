@@ -29,6 +29,9 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   /// Returns a stream of messages from Firebase for a given room.
   void rooms() {
     late final Query<Map<String, dynamic>> query;
+
+    loggerObject.w(baseUrl);
+
     if (!isAdmin) {
       query = FirebaseFirestore.instance
           .collection('rooms')

@@ -34,7 +34,6 @@ class _ChatCardAdminWidgetState extends State<ChatCardAdminWidget> {
     BuildContext context,
   ) async {
     if (context.mounted) {
-      context.read<GetRoomsCubit>().state.stream?.pause();
       openRoomFunction(context, widget.room).then((value) => setState(() {}));
     }
   }
@@ -94,7 +93,7 @@ class _ChatCardAdminWidgetState extends State<ChatCardAdminWidget> {
                   size: 150.0.r,
                   url: getChatMember(widget.room.users).firstName == '${isTestDomain ? 'test' : ''}0'
                       ? Assets.assetsLogo
-                      : '$baseImageUrl${getChatMember(widget.room.users).imageUrl}',
+                      : '$baseImageUrl${getChatMember(widget.room.users).imageUrl?.replaceAll(baseImageUrl, '')}',
                 ),
                 30.0.horizontalSpace,
                 Column(

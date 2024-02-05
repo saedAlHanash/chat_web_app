@@ -29,15 +29,30 @@ final appGoRouter = GoRouter(
         );
       },
     ),
-
+//https://lmss-29085.web.app?
+// id=82
+// name=Farouk Alkheame
+// photo=https://lms.almas.education/public/storage/users/February2024/FOKyMdaRMI9wEyq3UMvl.jpg
+// token=1024|MAssY29iHqboBEiSuBkj86n77fROO2ORSpzSYIT9
+// type=t
     ///Load Data
     GoRoute(
       name: GoRouteName.loadData,
       path: _GoRoutePath.loadData,
       builder: (BuildContext context, GoRouterState state) {
-        if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
-        // metaQuery = MetaQuery.fromJson(test);
-        metaQuery = MetaQuery.fromJson(state.queryParams);
+        // if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
+        metaQuery = MetaQuery.fromJson({
+          'id': '82',
+          'name': 'Farouk Alkheame',
+          'photo':
+              'https://lms.almas.education/public/storage/users/February2024/FOKyMdaRMI9wEyq3UMvl.jpg',
+          'token': '1024|MAssY29iHqboBEiSuBkj86n77fROO2ORSpzSYIT9',
+          'type': 't',
+          'fcm':
+              'cD2OaIqHQkmDgmlx8chs3W:APA91bELfrxiqpKFv3tioT13k14wgZ47v5dz3Bdm56fsBTwMB6wm1rCsZLVbssuYvXTcM-rylyZv1gyQzHOljmB8EbxGUNXL6cjOMIugHdvZTA3cShcJPIQwkcxYxT1dLb4_IiTN9ZdJ',
+          'domain': testUrl,
+        });
+        // metaQuery = MetaQuery.fromJson(state.queryParams);
         return LoadData(userChanged: AppSharedPreference.cashMetta(metaQuery));
       },
     ),

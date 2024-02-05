@@ -15,8 +15,7 @@ import '../go_route_pages.dart';
 import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_room_object.dart';
 
-const String baseUrl = 'https://manage.almas.education/api';
-const String baseImageUrl = 'https://manage.almas.education/public/storage/';
+final baseImageUrl = 'https://$baseUrl/public/storage/';
 
 extension TypesRoom on types.Room {
   bool get isNotReed {

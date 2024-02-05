@@ -96,9 +96,10 @@ class _ChatCardWidgetState extends State<ChatCardWidget> {
               children: [
                 CircleImageWidget(
                   size: 150.0.r,
-                  url: getChatMember(widget.room.users).firstName == '${isTestDomain ? 'test' : ''}0'
+                  url: getChatMember(widget.room.users).firstName ==
+                          '${isTestDomain ? 'test' : ''}0'
                       ? Assets.assetsLogo
-                      : '$baseImageUrl${getChatMember(widget.room.users).imageUrl}',
+                      : '$baseImageUrl${getChatMember(widget.room.users).imageUrl?.replaceAll(baseImageUrl, '')}',
                 ),
                 30.0.horizontalSpace,
                 Column(
