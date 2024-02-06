@@ -29,7 +29,7 @@ class ChatNotification {
 
   Map<String, dynamic> toJson() {
     return {
-      "body": body,
+      "message": body,
       "title": title,
       if (fcm.isNotEmpty) "fcm_token[0]": fcm,
       if (fcmWeb.isNotEmpty) "fcm_token[${fcm.isEmpty ? '0' : '1'}]": fcmWeb,
