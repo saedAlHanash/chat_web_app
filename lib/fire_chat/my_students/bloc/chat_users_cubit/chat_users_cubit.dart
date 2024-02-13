@@ -7,6 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../rooms_bloc/rooms_cubit.dart';
 import '../../../util.dart';
 import '../../data/response/chat_users_response.dart';
 
@@ -16,7 +17,7 @@ part 'chat_users_state.dart';
 class ChatUsersCubit extends Cubit<ChatUsersInitial> {
   ChatUsersCubit() : super(ChatUsersInitial.initial());
 
-  Future<void> getChatUsers() async {
+  Future<void> getChatUsers(BuildContext context) async {
     emit(state.copyWith(statuses: CubitStatuses.loading));
 
     final result = await _getChatUsersApi();
@@ -24,12 +25,17 @@ class ChatUsersCubit extends Cubit<ChatUsersInitial> {
     if (result == null) {
       emit(state.copyWith(statuses: CubitStatuses.error));
     } else {
+      for (var e in result) {
+        if (context.mounted) {
+          await context.read<RoomsCubit>().getRoomByUser(e.id.toString());
+        }
+      }
       emit(state.copyWith(statuses: CubitStatuses.done, result: result));
     }
   }
 
   Future<List<MyChatUser>?> _getChatUsersApi() async {
-    if(isAdmin) return [];
+    if (isAdmin) return [];
     final response = await APIService().getApi(
       url: isTeacher ? 'api/teacher/my-students' : "api/student/my-teachers",
     );

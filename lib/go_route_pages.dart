@@ -7,10 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:go_router/go_router.dart';
 
-import 'fire_chat/get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'fire_chat/load_page.dart';
 import 'fire_chat/messages_screen.dart';
 import 'fire_chat/my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
+import 'fire_chat/rooms_bloc/rooms_cubit.dart';
 
 var metaQuery = MetaQuery.fromJson({});
 var test = {
@@ -33,26 +33,21 @@ final appGoRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => GetRoomsCubit()..getChatRooms()),
+            BlocProvider(create: (_) => RoomsCubit()..getChatRooms()),
           ],
           child: const MessagesScreen(),
         );
       },
     ),
-//https://lmss-29085.web.app?
-// id=82
-// name=Farouk Alkheame
-// photo=https://lms.almas.education/public/storage/users/February2024/FOKyMdaRMI9wEyq3UMvl.jpg
-// token=1024|MAssY29iHqboBEiSuBkj86n77fROO2ORSpzSYIT9
-// type=t
+
     ///Load Data
     GoRoute(
       name: GoRouteName.loadData,
       path: _GoRoutePath.loadData,
       builder: (BuildContext context, GoRouterState state) {
-        if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
-        // metaQuery = MetaQuery.fromJson(test);
-        metaQuery = MetaQuery.fromJson(state.queryParams);
+        // if (state.queryParams.isEmpty) return const Scaffold(backgroundColor: Colors.red);
+        metaQuery = MetaQuery.fromJson(test);
+        // metaQuery = MetaQuery.fromJson(state.queryParams);
         return LoadData(userChanged: AppSharedPreference.cashMetta(metaQuery));
       },
     ),

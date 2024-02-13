@@ -2,25 +2,47 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
+import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:hive_flutter/adapters.dart';
 
 import '../../../main.dart';
 
+import '../chat_card_widget.dart';
 import '../util.dart';
 
-part 'room_messages_state.dart';
+part 'messages_state.dart';
 
-class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
-  RoomMessagesCubit() : super(RoomMessagesInitial.initial());
+class MessagesCubit extends Cubit<MessagesInitial> {
+  MessagesCubit() : super(MessagesInitial.initial());
 
   Future<void> getChatRoomMessage(types.Room room) async {
     if (firebaseUser == null) return;
-    emit(state.copyWith(room: room));
+
+    final allMessages = (boxes.messageBox?.values ?? {})
+        .map((e) => types.Message.fromJson(jsonDecode(e)))
+        .toList()
+      ..sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0));
+
+    emit(state.copyWith(room: room, allMessages: allMessages));
+
     messages(room);
+  }
+
+  Future<void> reInitial(types.Room room) async {
+    emit(state.copyWith(statuses: CubitStatuses.loading));
+    if (selectedId.isNotEmpty && (boxes.messageBox?.isOpen ?? false)) {
+      await boxes.messageBox?.close();
+    }
+
+    boxes.messageBox = await Hive.openBox<String>(room.id);
+
+    await state.stream?.cancel();
+    emit(MessagesInitial.initial());
   }
 
   /// Returns a stream of messages from Firebase for a given room.
@@ -36,7 +58,12 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
         );
 
     final stream = query.snapshots().listen((snapshot) async {
+      if (boxes.latestMessagesBox == null) {
+        await boxes.initialBoxes();
+      }
+
       final newMessages = <types.Message>[];
+
       for (var doc in snapshot.docs) {
         final data = doc.data();
         final author = room.users.firstWhere(
@@ -49,31 +76,33 @@ class RoomMessagesCubit extends Cubit<RoomMessagesInitial> {
         data['id'] = doc.id;
         data['updatedAt'] = data['updatedAt']?.millisecondsSinceEpoch;
 
-        await roomMessage?.put(doc.id, jsonEncode(data));
+        await boxes.messageBox?.put(doc.id, jsonEncode(data));
+
         final message = types.Message.fromJson(data);
-        await latestMessagesBox?.put(room.id, jsonEncode(data));
         newMessages.add(message);
       }
 
       if (!isClosed) {
-        emit(
-          state.copyWith(
-            allMessages: roomMessage!.values
-                .map((e) => types.Message.fromJson(jsonDecode(e)))
-                .toList()
-              ..sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0)),
-          ),
-        );
+        final allMessages = boxes.messageBox?.values
+            .map((e) => types.Message.fromJson(jsonDecode(e)))
+            .toList()
+          ?..sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0));
+
+        if (allMessages?.firstOrNull != null) {
+          await boxes.latestMessagesBox?.put(room.id, jsonEncode(allMessages?.first));
+        }
+
+        emit(state.copyWith(allMessages: allMessages));
       }
     });
-
-    await latestUpdateMessagesBox?.put(room.id, room.updatedAt ?? 0);
 
     emit(state.copyWith(stream: stream, roomId: room.id));
   }
 
   int get getLatestUpdatedFromHive {
-    return state.allMessages.firstOrNull?.updatedAt ?? 0;
+    final time = state.allMessages.firstOrNull?.updatedAt ?? 0;
+    loggerObject.v(time);
+    return time;
   }
 
   @override

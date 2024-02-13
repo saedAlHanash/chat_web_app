@@ -1,5 +1,6 @@
 import 'package:chat_web_app/app_widget.dart';
 import 'package:chat_web_app/fire_chat/extensions.dart';
+import 'package:chat_web_app/fire_chat/rooms_bloc/rooms_cubit.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
 import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:drawable_text/drawable_text.dart';
@@ -14,7 +15,6 @@ import 'package:image_multi_type/round_image_widget.dart';
 
 import '../go_route_pages.dart';
 import 'chat_card_widget.dart';
-import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
 import 'my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
 import 'my_students/data/response/chat_users_response.dart';
 
@@ -28,7 +28,7 @@ class UsersPage extends StatefulWidget {
 class _UsersPageState extends State<UsersPage> {
   @override
   void initState() {
-    context.read<ChatUsersCubit>().getChatUsers();
+
     super.initState();
   }
 
@@ -102,12 +102,12 @@ class _UserItemState extends State<UserItem> {
     if (loading) return;
     setState(() => loading = true);
     final room =
-        await context.read<GetRoomsCubit>().getRoomByUser(widget.user.id.toString());
+        await context.read<RoomsCubit>().getRoomByUser(widget.user.id.toString());
 
     setState(() => loading = false);
     if (context.mounted && room != null) {
       if (context.mounted) {
-        openRoomFunction(context, room);
+        // openRoomFunction(context, room);
       }
     } else {
       // Get.showSnackbar(const GetSnackBar(

@@ -37,6 +37,7 @@ DateTime? _serverDate;
 DateTime get getServerDate => _serverDate ?? DateTime.now();
 
 class APIService {
+
   static APIService _singleton = APIService._internal();
 
   factory APIService() => _singleton;
@@ -194,7 +195,7 @@ class APIService {
     innerHeader.addAll(header ?? {});
 
     final uri = Uri.https(hostName ?? baseUrl, url, query);
-    loggerObject.w(uri);
+
     logRequest(url, (body ?? {})..addAll(query ?? {}));
 
     try {
@@ -328,7 +329,7 @@ class APIService {
     innerHeader.addAll(header ?? {});
     final uri = Uri.https(baseUrl, url);
 
-    loggerObject.w(uri);
+
     var request = http.MultipartRequest(type, uri);
 
     logRequest(url, fields, additional: files?.firstOrNull?.nameField);

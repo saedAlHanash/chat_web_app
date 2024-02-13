@@ -269,7 +269,7 @@ class _ChatListState extends State<ChatList>
             if (widget.bottomWidget != null)
               SliverToBoxAdapter(child: widget.bottomWidget),
             SliverPadding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: 40),
               sliver: SliverToBoxAdapter(
                 child: (widget.typingIndicatorOptions!.typingUsers.isNotEmpty &&
                         !_indicatorOnScrollStatus)
@@ -285,7 +285,7 @@ class _ChatListState extends State<ChatList>
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: 40),
               sliver: SliverAnimatedList(
                 findChildIndexCallback: (Key key) {
                   if (key is ValueKey<Object>) {

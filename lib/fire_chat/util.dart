@@ -1,18 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:chat_web_app/api_manager/api_service.dart';
 import 'package:chat_web_app/api_manager/api_url.dart';
 import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:hive_flutter/adapters.dart';
 
-import '../go_route_pages.dart';
-import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
+import '../main.dart';
 import 'my_room_object.dart';
 
 final baseImageUrl = 'https://$baseUrl/public/storage/';
@@ -20,35 +18,21 @@ final baseImageUrl = 'https://$baseUrl/public/storage/';
 extension TypesRoom on types.Room {
   bool get isNotReed {
     if (createdAt == updatedAt) return false;
-    final result = (updatedAt ?? 0) - (latestUpdateMessagesBox?.get(id) ?? 0);
-    // loggerObject.w('$id $updatedAt - ${(latestUpdateMessagesBox.get(id))} = $result');
+    final json = boxes.latestMessagesBox?.get(id);
+
+    if (json == null) return false;
+
+    final message = types.Message.fromJson(jsonDecode(json));
+
+    final messageUpdatedAt = message.updatedAt;
+
+    final result = (updatedAt ?? 0) - (messageUpdatedAt ?? updatedAt ?? 0);
+    loggerObject.w('$id $updatedAt - ${(messageUpdatedAt)} = $result');
     return result > 2000;
   }
 }
 
 enum CubitStatuses { init, loading, done, error }
-
-Box<String>? roomsBox;
-Box? usersBox;
-Box<String>? roomMessage;
-Box<int>? latestUpdateMessagesBox;
-
-Box<String>? latestMessagesBox;
-
-Future<void> initialBoxes() async {
-  roomsBox = await Hive.openBox('rooms');
-  latestUpdateMessagesBox = await Hive.openBox('messages');
-  usersBox = await Hive.openBox('users');
-  latestMessagesBox = await Hive.openBox('latestMessagesBox');
-}
-
-Future<void> reInitialBoxes() async {
-  await roomsBox?.close();
-  await latestUpdateMessagesBox?.close();
-  await usersBox?.close();
-  await latestMessagesBox?.close();
-  await initialBoxes();
-}
 
 User? get firebaseUser {
   final user = FirebaseChatCore.instance.firebaseUser;
@@ -155,8 +139,10 @@ Future<void> logoutChatUser() async {
     );
   }
   loggerObject.w('logout');
-  await roomsBox?.clear();
-  await reInitialBoxes();
+
+  await boxes.roomsBox?.clear();
+  boxes.reInitialBoxes();
+
   await FirebaseAuth.instance.signOut();
 }
 
@@ -201,4 +187,36 @@ Future<void> _initial() async {
 
   await initFirebaseChat();
   loading = false;
+}
+
+class UtilBoxes {
+  Box<String>? roomsBox;
+
+  Box<String>? messageBox;
+
+  Box<String>? latestMessagesBox;
+
+  UtilBoxes();
+
+  Future<bool> initialBoxes() async {
+    roomsBox = Hive.isBoxOpen('rooms')
+        ? Hive.box<String>('rooms')
+        : await Hive.openBox<String>('rooms');
+
+    latestMessagesBox = Hive.isBoxOpen('latestMessagesBox')
+        ? Hive.box<String>('latestMessagesBox')
+        : await Hive.openBox<String>('latestMessagesBox');
+
+    return true;
+  }
+
+  Future<void> reInitialBoxes() async {
+    await roomsBox?.close();
+
+    await latestMessagesBox?.close();
+
+    roomsBox = await Hive.openBox('roomsBox');
+
+    latestMessagesBox = await Hive.openBox('latestMessagesBox');
+  }
 }

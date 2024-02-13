@@ -1,54 +1,60 @@
-part of 'get_rooms_cubit.dart';
+part of 'rooms_cubit.dart';
 
-class GetRoomsInitial {
+class RoomsInitial {
   final CubitStatuses statuses;
   final List<types.Room> allRooms;
   final List<types.Room> myRooms;
   final String error;
-  final bool noReadMessages;
+  final String selectedId;
+
   final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? stream;
 
-  const GetRoomsInitial({
+  const RoomsInitial({
     required this.statuses,
     required this.allRooms,
+    required this.selectedId,
     required this.error,
-    required this.noReadMessages,
+
     required this.myRooms,
     this.stream,
   });
 
-  factory GetRoomsInitial.initial() {
-    final allFromHive = roomsBox!.values.map((e) {
+  factory RoomsInitial.initial() {
+
+    final allFromHive = boxes.roomsBox?.values.map((e) {
       return types.Room.fromJson(jsonDecode(e));
     }).toList()
-      ..sort((a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0));
+      ?..sort((a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0));
 
-    final myRoom = allFromHive.where((e) => _isMe(e)).toList()
-      ..sort((a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0));
+    final myRoom = allFromHive?.where((e) => _isMe(e)).toList()
+      ?..sort((a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0));
 
-    return GetRoomsInitial(
-      allRooms: allFromHive,
-      myRooms: myRoom,
+    return RoomsInitial(
+      allRooms: allFromHive ?? [],
+      myRooms: myRoom ?? [],
       error: '',
-      noReadMessages: false,
+      selectedId: '',
+
       statuses: CubitStatuses.init,
     );
   }
 
-  GetRoomsInitial copyWith({
+  RoomsInitial copyWith({
     CubitStatuses? statuses,
     List<types.Room>? allRooms,
     List<types.Room>? myRooms,
     String? error,
-    bool? noReadMessages,
+    String? selectedId,
+
     StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? stream,
   }) {
-    return GetRoomsInitial(
+    return RoomsInitial(
         statuses: statuses ?? this.statuses,
         allRooms: allRooms ?? this.allRooms,
         myRooms: myRooms ?? this.myRooms,
         error: error ?? this.error,
-        noReadMessages: noReadMessages ?? this.noReadMessages,
+        selectedId: selectedId ?? this.selectedId,
+
         stream: stream ?? this.stream);
   }
 

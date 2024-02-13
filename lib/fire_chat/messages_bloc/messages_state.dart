@@ -1,6 +1,6 @@
-part of 'room_messages_cubit.dart';
+part of 'messages_cubit.dart';
 
-class RoomMessagesInitial  {
+class MessagesInitial {
   final CubitStatuses statuses;
   final List<types.Message> allMessages;
   final String roomId;
@@ -8,7 +8,7 @@ class RoomMessagesInitial  {
   final int oldLength;
   final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? stream;
 
-  const RoomMessagesInitial({
+  const MessagesInitial({
     required this.statuses,
     required this.allMessages,
     required this.roomId,
@@ -17,20 +17,19 @@ class RoomMessagesInitial  {
     this.stream,
   });
 
-  factory RoomMessagesInitial.initial() {
-    return RoomMessagesInitial(
-      allMessages:
-      roomMessage!.values.map((e) => types.Message.fromJson(jsonDecode(e))).toList()
-        ..sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0)),
+  factory MessagesInitial.initial() {
+
+    loggerObject.w(boxes.messageBox?.length);
+    return MessagesInitial(
+      allMessages: [],
       roomId: '',
       room: const types.Room(id: '0', type: RoomType.direct, users: []),
-      oldLength: roomMessage!.length,
+      oldLength: boxes.messageBox?.length ?? 0,
       statuses: CubitStatuses.init,
     );
   }
 
-
-  RoomMessagesInitial copyWith({
+  MessagesInitial copyWith({
     CubitStatuses? statuses,
     List<types.Message>? allMessages,
     String? roomId,
@@ -38,7 +37,7 @@ class RoomMessagesInitial  {
     int? oldLength,
     StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? stream,
   }) {
-    return RoomMessagesInitial(
+    return MessagesInitial(
         statuses: statuses ?? this.statuses,
         allMessages: allMessages ?? this.allMessages,
         roomId: roomId ?? this.roomId,

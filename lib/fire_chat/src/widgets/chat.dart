@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart' show PhotoViewComputedScale;
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -246,8 +247,7 @@ class FireChat extends StatefulWidget {
   final void Function(BuildContext context, types.Message)? onMessageLongPress;
 
   /// See [Message.onMessageStatusLongPress].
-  final void Function(BuildContext context, types.Message)?
-      onMessageStatusLongPress;
+  final void Function(BuildContext context, types.Message)? onMessageStatusLongPress;
 
   /// See [Message.onMessageStatusTap].
   final void Function(BuildContext context, types.Message)? onMessageStatusTap;
@@ -259,8 +259,7 @@ class FireChat extends StatefulWidget {
   final void Function(types.Message, bool visible)? onMessageVisibilityChanged;
 
   /// See [Message.onPreviewDataFetched].
-  final void Function(types.TextMessage, types.PreviewData)?
-      onPreviewDataFetched;
+  final void Function(types.TextMessage, types.PreviewData)? onPreviewDataFetched;
 
   /// See [Input.onSendPressed].
   final void Function(types.PartialText) onSendPressed;
@@ -323,8 +322,7 @@ class FireChat extends StatefulWidget {
       videoMessageBuilder;
 
   /// See [Message.slidableMessageBuilder].
-  final Widget Function(types.Message, Widget msgWidget)?
-      slidableMessageBuilder;
+  final Widget Function(types.Message, Widget msgWidget)? slidableMessageBuilder;
 
   @override
   State<FireChat> createState() => FireChatState();
@@ -384,8 +382,7 @@ class FireChatState extends State<FireChat> {
   }
 
   /// Highlight the message with the specified [id].
-  void highlightMessage(String id, {Duration? duration}) =>
-      _scrollController.highlight(
+  void highlightMessage(String id, {Duration? duration}) => _scrollController.highlight(
         chatMessageAutoScrollIndexById[id]!,
         highlightDuration: duration ?? const Duration(seconds: 3),
       );
@@ -458,10 +455,9 @@ class FireChatState extends State<FireChat> {
         messageWidget = widget.systemMessageBuilder?.call(message) ??
             SystemMessage(message: message.text);
       } else {
-        final messageWidth =
-            widget.showUserAvatars && message.author.id != widget.user.id
-                ? min(constraints.maxWidth * 0.72, 440).floor()
-                : min(constraints.maxWidth * 0.78, 440).floor();
+        final messageWidth = widget.showUserAvatars && message.author.id != widget.user.id
+            ? min(constraints.maxWidth * 0.72, 440).floor()
+            : min(constraints.maxWidth * 0.78, 440).floor();
         final Widget msgWidget = Message(
           audioMessageBuilder: widget.audioMessageBuilder,
           avatarBuilder: widget.avatarBuilder,
@@ -604,59 +600,53 @@ class FireChatState extends State<FireChat> {
               children: [
                 Container(
                   color: widget.theme.backgroundColor,
-                  child: Column(
-                    children: [
-                      Flexible(
-                        child: widget.messages.isEmpty
-                            ? SizedBox.expand(
-                                child: _emptyStateBuilder(),
-                              )
-                            : GestureDetector(
-                                onTap: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  widget.onBackgroundTap?.call();
-                                },
-                                child: LayoutBuilder(
-                                  builder: (
-                                    BuildContext context,
-                                    BoxConstraints constraints,
-                                  ) =>
-                                      ChatList(
-                                    bottomWidget: widget.listBottomWidget,
-                                    bubbleRtlAlignment:
-                                        widget.bubbleRtlAlignment!,
-                                    isLastPage: widget.isLastPage,
-                                    itemBuilder: (Object item, int? index) =>
-                                        _messageBuilder(
-                                      item,
-                                      constraints,
-                                      index,
-                                    ),
-                                    items: _chatMessages,
-                                    keyboardDismissBehavior:
-                                        widget.keyboardDismissBehavior,
-                                    onEndReached: widget.onEndReached,
-                                    onEndReachedThreshold:
-                                        widget.onEndReachedThreshold,
-                                    scrollController: _scrollController,
-                                    scrollPhysics: widget.scrollPhysics,
-                                    typingIndicatorOptions:
-                                        widget.typingIndicatorOptions,
-                                    useTopSafeAreaInset:
-                                        widget.useTopSafeAreaInset ?? isMobile,
-                                  ),
-                                ),
+                  child: widget.messages.isEmpty
+                      ? SizedBox.expand(
+                          child: _emptyStateBuilder(),
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            widget.onBackgroundTap?.call();
+                          },
+                          child: LayoutBuilder(
+                            builder: (
+                              BuildContext context,
+                              BoxConstraints constraints,
+                            ) =>
+                                ChatList(
+                              bottomWidget: widget.listBottomWidget,
+                              bubbleRtlAlignment: widget.bubbleRtlAlignment!,
+                              isLastPage: widget.isLastPage,
+                              itemBuilder: (Object item, int? index) => _messageBuilder(
+                                item,
+                                constraints,
+                                index,
                               ),
-                      ),
-                      widget.customBottomWidget ??
-                          Input(
-                            isAttachmentUploading: widget.isAttachmentUploading,
-                            onAttachmentPressed: widget.onAttachmentPressed,
-                            onSendPressed: widget.onSendPressed,
-                            options: widget.inputOptions,
+                              items: _chatMessages,
+                              keyboardDismissBehavior: widget.keyboardDismissBehavior,
+                              onEndReached: widget.onEndReached,
+                              onEndReachedThreshold: widget.onEndReachedThreshold,
+                              scrollController: _scrollController,
+                              scrollPhysics: widget.scrollPhysics,
+                              typingIndicatorOptions: widget.typingIndicatorOptions,
+                              useTopSafeAreaInset:
+                                  widget.useTopSafeAreaInset ?? isMobile,
+                            ),
                           ),
-                    ],
-                  ),
+                        ),
+                ),
+                Positioned(
+                  bottom: 13.r,
+                  left: 40.r,
+                  right: 40.r,
+                  child: widget.customBottomWidget ??
+                      Input(
+                        isAttachmentUploading: widget.isAttachmentUploading,
+                        onAttachmentPressed: widget.onAttachmentPressed,
+                        onSendPressed: widget.onSendPressed,
+                        options: widget.inputOptions,
+                      ),
                 ),
                 if (_isImageViewVisible)
                   ImageGallery(

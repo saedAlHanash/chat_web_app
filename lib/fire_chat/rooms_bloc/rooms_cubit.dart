@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:chat_web_app/api_manager/api_service.dart';
+import 'package:chat_web_app/fire_chat/chat_card_widget.dart';
 import 'package:chat_web_app/go_route_pages.dart';
 import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,12 +12,14 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 
 import '../../api_manager/api_url.dart';
+
+import '../../main.dart';
 import '../util.dart';
 
-part 'get_rooms_state.dart';
+part 'rooms_state.dart';
 
-class GetRoomsCubit extends Cubit<GetRoomsInitial> {
-  GetRoomsCubit() : super(GetRoomsInitial.initial());
+class RoomsCubit extends Cubit<RoomsInitial> {
+  RoomsCubit() : super(RoomsInitial.initial());
 
   Future<void> getChatRooms() async {
     if (await firebaseUserAsync == null) return;
@@ -29,8 +32,6 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   /// Returns a stream of messages from Firebase for a given room.
   void rooms() {
     late final Query<Map<String, dynamic>> query;
-
-    loggerObject.w(baseUrl);
 
     if (!isAdmin) {
       query = FirebaseFirestore.instance
@@ -58,9 +59,11 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
           );
     }
 
-
-
     final stream = query.snapshots().listen((snapshot) async {
+      if (boxes.roomsBox == null) {
+        await boxes.initialBoxes();
+      }
+
       final listRooms = await processRoomsQuery(
         firebaseUser!,
         FirebaseFirestore.instance,
@@ -68,19 +71,9 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
         'users',
       );
 
-      // for (var e in listRooms) {
-      //   final json = latestMessagesBox?.get(e.id);
-      //   if (json == null || json.isEmpty) continue;
-      //   final message = types.Message.fromJson(jsonDecode(json));
-      //   await latestMessagesBox?.put(e.id,
-      //       jsonEncode((message as types.TextMessage).copyWith(text: 'رسالة جديدة')));
-      // }
-
       await storeRoomsInHive(listRooms);
 
-      if (!isClosed) {
-        _setData();
-      }
+      _setData();
     });
 
     emit(state.copyWith(stream: stream));
@@ -91,30 +84,30 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   }
 
   void _setData() {
-    final rooms = getRoomsFromHive;
+    if (isClosed) return;
 
-    // rooms.removeWhere((e) => (e.name??'').toLowerCase().contains('customer service'));
-    final allRooms = rooms
-      // ..addAll(rooms)
-      ..sort((a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0));
+    final allRooms = getRoomsFromHive
+      ?..sort(
+        (a, b) => (b.updatedAt ?? 0).compareTo(a.updatedAt ?? 0),
+      );
 
     emit(
       state.copyWith(
-          allRooms: allRooms,
-          statuses: CubitStatuses.done,
-          noReadMessages: allRooms.firstWhereOrNull((e) => e.isNotReed) != null),
+        allRooms: allRooms,
+        statuses: CubitStatuses.done,
+      ),
     );
   }
 
-  List<types.Room> get getRoomsFromHive {
-    return roomsBox!.values.map((e) {
+  List<types.Room>? get getRoomsFromHive {
+    return boxes.roomsBox?.values.map((e) {
       return types.Room.fromJson(jsonDecode(e));
     }).toList();
   }
 
   Future<void> storeRoomsInHive(List<types.Room> rooms) async {
     for (var e in rooms) {
-      await roomsBox?.put(e.id, jsonEncode(e));
+      await boxes.roomsBox?.put(e.id, jsonEncode(e));
     }
   }
 
@@ -143,8 +136,10 @@ class GetRoomsCubit extends Cubit<GetRoomsInitial> {
   }
 
   void reInitial() {
-    emit(GetRoomsInitial.initial());
+    emit(RoomsInitial.initial());
   }
+
+  void selectRoom(String selectedId) => emit(state.copyWith(selectedId: selectedId));
 
   @override
   Future<Function> close() async {

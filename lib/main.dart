@@ -1,4 +1,5 @@
 import 'package:chat_web_app/fire_chat/util.dart';
+
 import 'package:chat_web_app/util/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'fire_chat/my_students/bloc/chat_users_cubit/chat_users_cubit.dart';
 import 'firebase_options.dart';
 
 Box<dynamic>? hiveFilesBox;
+final boxes = UtilBoxes();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +26,7 @@ Future<void> main() async {
 
   await Hive.initFlutter();
 
-  await initialBoxes();
+  await boxes.initialBoxes();
 
   setPathUrlStrategy();
 
@@ -34,6 +36,6 @@ Future<void> main() async {
     providers: [
       BlocProvider(create: (_) => ChatUsersCubit()),
     ],
-    child: MyApp(),
+    child: const MyApp(),
   ));
 }

@@ -144,6 +144,7 @@ class _InputState extends State<Input> {
             decoration:
                 InheritedChatTheme.of(context).theme.inputContainerDecoration,
             padding: safeAreaInsets,
+            clipBehavior: Clip.hardEdge,
             child: Row(
               textDirection: TextDirection.ltr,
               children: [

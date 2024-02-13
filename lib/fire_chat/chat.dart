@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_web_app/api_manager/api_service.dart';
-import 'package:chat_web_app/fire_chat/room_messages_bloc/room_messages_cubit.dart';
+import 'package:chat_web_app/fire_chat/extensions.dart';
+import 'package:chat_web_app/fire_chat/messages_bloc/messages_cubit.dart';
 import 'package:chat_web_app/fire_chat/src/chat_theme.dart';
 import 'package:chat_web_app/fire_chat/util.dart';
 import 'package:chat_web_app/util/shared_preferences.dart';
@@ -26,7 +27,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../main.dart';
 import '../app_widget.dart';
-import 'get_chats_rooms_bloc/get_rooms_cubit.dart';
+
 import 'my_room_object.dart';
 import 'src/widgets/chat.dart';
 import 'dart:html' as html;
@@ -49,7 +50,7 @@ class _ChatPageState extends State<ChatPage> {
   // late final
   List<types.Message>? initialMessage;
 
-  late final RoomMessagesCubit cubit;
+  late final MessagesCubit cubit;
 
   late final MyRoomObject myRoomObject;
 
@@ -60,26 +61,27 @@ class _ChatPageState extends State<ChatPage> {
       fcmToken: (getChatMember(widget.room.users).metadata ?? {})['fcm'] ?? '',
       fcmTokenWeb: (getChatMember(widget.room.users).metadata ?? {})['fcm_web'] ?? '',
     );
-    cubit = context.read<RoomMessagesCubit>();
+    cubit = context.read<MessagesCubit>();
     super.initState();
   }
 
-  @override
-  void deactivate() {
-    if (cubit.state.allMessages.isNotEmpty) {
-      final m = cubit.state.allMessages.first;
-
-      latestUpdateMessagesBox?.put(cubit.state.roomId, m.updatedAt ?? 0);
-      var room =
-          types.Room.fromJson(jsonDecode(roomsBox?.get(cubit.state.roomId) ?? '{}'));
-      if (room.updatedAt == m.updatedAt) return;
-      room = room.copyWith(updatedAt: m.updatedAt);
-      roomsBox?.put(cubit.state.roomId, jsonEncode(room));
-      context.read<GetRoomsCubit>().updateRooms();
-    }
-
-    super.deactivate();
-  }
+  // @override
+  // void deactivate() {
+  //   if (cubit.state.allMessages.isNotEmpty) {
+  //     final m = cubit.state.allMessages.first;
+  //     boxes.latestUpdateMessagesBox?.put(cubit.state.roomId, m.updatedAt ?? 0);
+  //
+  //     var room = types.Room.fromJson(
+  //         jsonDecode(boxes.roomsBox?.get(cubit.state.roomId) ?? '{}'));
+  //
+  //     if (room.updatedAt == m.updatedAt) return;
+  //     room = room.copyWith(updatedAt: m.updatedAt);
+  //     boxes.roomsBox?.put(cubit.state.roomId, jsonEncode(room));
+  //     context.read<GetRoomsCubit>().updateRooms();
+  //   }
+  //
+  //   super.deactivate();
+  // }
 
   bool _isAttachmentUploading = false;
 
@@ -257,30 +259,12 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: !isAdmin
-            ? Text(widget.name)
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  DrawableText(
-                    size: 20.0.sp,
-                    text: widget.room.users.first.lastName.toString(),
-                    color: Colors.black,
-                  ),
-                  const Text(' | '),
-                  DrawableText(
-                    size: 20.0.sp,
-                    text: widget.room.users.last.lastName.toString(),
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-      ),
-      body: BlocBuilder<RoomMessagesCubit, RoomMessagesInitial>(
+      body: BlocBuilder<MessagesCubit, MessagesInitial>(
+        buildWhen: (p, c) => c.roomId == widget.room.id,
         builder: (context, state) {
+          if (state.statuses.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return FireChat(
             isAttachmentUploading: _isAttachmentUploading,
             messages: state.allMessages,
@@ -295,7 +279,9 @@ class _ChatPageState extends State<ChatPage> {
                   )
                 : widget.room.users.last,
             theme: DefaultChatTheme(
+              backgroundColor: const Color(0xFFEAEAFF),
               inputBackgroundColor: Colors.white,
+              inputBorderRadius: BorderRadius.circular(30.0.r),
               inputTextColor: mainColor,
               inputTextDecoration: InputDecoration(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0).r,
@@ -320,11 +306,9 @@ class _ChatPageState extends State<ChatPage> {
                   borderSide: const BorderSide(color: Colors.grey),
                 ),
               ),
-              inputContainerDecoration: const BoxDecoration(
+              inputContainerDecoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(
-                  top: BorderSide(color: Color(0xffB8B8D2)),
-                ),
+                borderRadius: BorderRadius.circular(30.0.r),
               ),
               inputPadding: const EdgeInsets.symmetric(vertical: 10.0).h,
             ),
