@@ -92,9 +92,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           color: Colors.grey[100],
                         );
                       },
-                      itemCount: state.allRooms.length + 1,
+                      itemCount: state.allRooms.length + (isAdmin ? 0 : 1),
                       itemBuilder: (context, i) {
-                        if (state.allRooms.length == i) {
+                        if (state.allRooms.length == i && !isAdmin) {
                           return BlocBuilder<ChatUsersCubit, ChatUsersInitial>(
                             builder: (context, state) {
                               if (state.statuses.loading) {

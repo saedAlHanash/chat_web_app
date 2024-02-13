@@ -14,12 +14,12 @@ import 'fire_chat/rooms_bloc/rooms_cubit.dart';
 
 var metaQuery = MetaQuery.fromJson({});
 var test = {
-  'id': '82',
+  'id': '0',
   'name': 'Farouk Alkheame',
   'photo':
       'https://lms.almas.education/public/storage/users/February2024/FOKyMdaRMI9wEyq3UMvl.jpg',
   'token': '1024|MAssY29iHqboBEiSuBkj86n77fROO2ORSpzSYIT9',
-  'type': 't',
+  'type': 'a',
   'fcm':
       'cD2OaIqHQkmDgmlx8chs3W:APA91bELfrxiqpKFv3tioT13k14wgZ47v5dz3Bdm56fsBTwMB6wm1rCsZLVbssuYvXTcM-rylyZv1gyQzHOljmB8EbxGUNXL6cjOMIugHdvZTA3cShcJPIQwkcxYxT1dLb4_IiTN9ZdJ',
   'domain': testUrl,
