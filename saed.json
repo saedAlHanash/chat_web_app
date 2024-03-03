@@ -1,5 +1,5 @@
 {
-  "message": "Attempt to read property \"user_id\" on null",
+  "message": "https://lmss-29085.web.app/?id=0&type=a",
   "exception": "ErrorException",
   "file": "/home/almafpby/lms.almas.education/app/Http/Controllers/LoginController.php",
   "line": 249,
